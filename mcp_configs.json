@@ -1,0 +1,633 @@
+[
+    {
+        "id":  "browser",
+        "name":  "Browser",
+        "enabled":  true,
+        "command":  "",
+        "entry":  "server/node_modules/@playwright/mcp/cli.js",
+        "rawCommandArguments":  [
+                                    "--browser",
+                                    "msedge",
+                                    "--headless",
+                                    "--isolated",
+                                    "--image-responses",
+                                    "omit"
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\browser",
+        "internalPort":  11602,
+        "externalPort":  11502,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\browser\\mcp.err.log",
+        "installMethod":  "npm",
+        "npmPackage":  "@playwright/mcp@0.0.78",
+        "gitRepository":  "https://github.com/microsoft/playwright-mcp.git"
+    },
+    {
+        "id":  "filesystem",
+        "name":  "Filesystem",
+        "enabled":  true,
+        "command":  "",
+        "entry":  "node_modules/@modelcontextprotocol/server-filesystem/dist/index.js",
+        "rawCommandArguments":  [
+                                    "{FILESYSTEM_ROOT_1}",
+                                    "{FILESYSTEM_ROOT_2}"
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\filesystem\\server",
+        "internalPort":  11601,
+        "externalPort":  11501,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\filesystem\\mcp.err.log",
+        "environment":  {
+                            "FILESYSTEM_MCP_TREE_MAX_DEPTH":  "1",
+                            "FILESYSTEM_MCP_TREE_MAX_ENTRIES":  "500",
+                            "FILESYSTEM_MCP_MAX_TEXT_CHARS":  "60000",
+                            "FILESYSTEM_MCP_MAX_MULTI_FILES":  "8",
+                            "FILESYSTEM_MCP_MAX_SEARCH_RESULTS":  "200",
+                            "FILESYSTEM_MCP_MAX_DIR_ENTRIES":  "500"
+                        },
+        "installMethod":  "npm",
+        "npmPackage":  "@modelcontextprotocol/server-filesystem@2026.1.14",
+        "gitRepository":  "https://github.com/modelcontextprotocol/servers.git",
+        "installVariables":  [
+                                 {
+                                     "name":  "{FILESYSTEM_ROOT_1}",
+                                     "value":  "",
+                                     "description":  "Р В РЎвЂ”Р В Р’ВµР РЋР вЂљР В Р вЂ Р РЋРЎвЂњР РЋР вЂ№ Р В РЎвЂ”Р В Р’В°Р В РЎвЂ”Р В РЎвЂќР РЋРЎвЂњ, Р В РўвЂР В РЎвЂўР РЋР С“Р РЋРІР‚С™Р РЋРЎвЂњР В РЎвЂ”Р В Р вЂ¦Р РЋРЎвЂњР РЋР вЂ№ Filesystem MCP",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{FILESYSTEM_ROOT_2}",
+                                     "value":  "",
+                                     "description":  "Р В Р вЂ Р РЋРІР‚С™Р В РЎвЂўР РЋР вЂљР РЋРЎвЂњР РЋР вЂ№ Р В РЎвЂ”Р В Р’В°Р В РЎвЂ”Р В РЎвЂќР РЋРЎвЂњ, Р В РўвЂР В РЎвЂўР РЋР С“Р РЋРІР‚С™Р РЋРЎвЂњР В РЎвЂ”Р В Р вЂ¦Р РЋРЎвЂњР РЋР вЂ№ Filesystem MCP",
+                                     "promptOnInstall":  true
+                                 }
+                             ]
+    },
+    {
+        "id":  "git",
+        "name":  "Git",
+        "enabled":  true,
+        "command":  "",
+        "entry":  "server/node_modules/@cyanheads/git-mcp-server/dist/index.js",
+        "rawCommandArguments":  [
+
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\git",
+        "internalPort":  11604,
+        "externalPort":  11504,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\git\\mcp.err.log",
+        "environment":  {
+                            "GIT_MCP_MAX_COMMITS":  "20",
+                            "GIT_MCP_MAX_DIFF_SIZE":  "5000",
+                            "GIT_MCP_MAX_LOG_LINES":  "100",
+                            "GIT_MCP_MAX_STATUS_LINES":  "50"
+                        },
+        "installMethod":  "npm",
+        "npmPackage":  "@cyanheads/git-mcp-server@2.15.1",
+        "gitRepository":  "https://github.com/cyanheads/git-mcp-server.git"
+    },
+    {
+        "id":  "system-monitor",
+        "name":  "System Monitor",
+        "enabled":  true,
+        "command":  "",
+        "entry":  "server/server.js",
+        "rawCommandArguments":  [
+
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\system-monitor",
+        "internalPort":  11603,
+        "externalPort":  11503,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\system-monitor\\mcp.err.log",
+        "installMethod":  "npm",
+        "npmPackage":  "@modelcontextprotocol/sdk@1.29.0",
+        "builtinTemplate":  "system-monitor"
+    },
+    {
+        "id":  "code-index",
+        "name":  "Code Index",
+        "enabled":  false,
+        "command":  "",
+        "entry":  "node_modules\\.bin\\code-index-mcp.cmd",
+        "rawCommandArguments":  [
+                                    "serve",
+                                    "--config",
+                                    "{APP_DIR}\\mcps\\code-index\\.generated\\runtime\\daemon.toml"
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\code-index\\server",
+        "internalPort":  11605,
+        "externalPort":  11505,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\code-index\\mcp.err.log",
+        "environment":  {
+                            "CODE_INDEX_HOME":  "{APP_DIR}\\mcps\\code-index\\.generated\\runtime"
+                        },
+        "installMethod":  "npm",
+        "npmPackage":  "@regsorm/code-index-mcp",
+        "gitRepository":  "https://github.com/Regsorm/code-index-mcp.git",
+        "installVariables":  [
+                                 {
+                                     "name":  "{CODE_INDEX_PROJECT_PATH}",
+                                     "value":  "",
+                                     "multiple":  true,
+                                     "values":  [
+
+                                                ],
+                                     "description":  "Р В РЎвЂ”Р В Р’В°Р В РЎвЂ”Р В РЎвЂќР РЋРЎвЂњ Р В РЎвЂ”Р РЋР вЂљР В РЎвЂўР В Р’ВµР В РЎвЂќР РЋРІР‚С™Р В Р’В° Р В РўвЂР В Р’В»Р РЋР РЏ Р В РЎвЂР В Р вЂ¦Р В РўвЂР В Р’ВµР В РЎвЂќР РЋР С“Р В Р’В°Р РЋРІР‚В Р В РЎвЂР В РЎвЂ Code Index MCP",
+                                     "promptOnInstall":  true
+                                 }
+                             ],
+        "commands":  [
+                         {
+                             "title":  "{1} Init project",
+                             "command":  "node_modules\\.bin\\code-index-mcp.cmd",
+                             "arguments":  "init --path \"{CODE_INDEX_PROJECT_PATH}\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "Index project",
+                             "command":  "node_modules\\.bin\\code-index-mcp.cmd",
+                             "arguments":  "index \"{CODE_INDEX_PROJECT_PATH}\"",
+                             "log":  true,
+                             "background":  true,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "Force reindex",
+                             "command":  "node_modules\\.bin\\code-index-mcp.cmd",
+                             "arguments":  "index \"{CODE_INDEX_PROJECT_PATH}\" --force",
+                             "log":  true,
+                             "background":  true,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "Clean stale entries",
+                             "command":  "node_modules\\.bin\\code-index-mcp.cmd",
+                             "arguments":  "clean --path \"{CODE_INDEX_PROJECT_PATH}\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "Daemon status",
+                             "command":  "node_modules\\.bin\\code-index-mcp.cmd",
+                             "arguments":  "daemon status --json",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Stats",
+                             "command":  "node_modules\\.bin\\code-index-mcp.cmd",
+                             "arguments":  "stats --path \"{CODE_INDEX_PROJECT_PATH}\" --json",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         }
+                     ]
+    },
+    {
+        "id":  "vanessa-automation",
+        "name":  "Vanessa Automation MCP",
+        "enabled":  false,
+        "command":  "\"{VA_1CV8C_PATH}\" ENTERPRISE /TESTMANAGER {VA_TEST_MANAGER_CONNECTION_ARGS} /Execute \"{VA_AUTOMATION_EPF}\" /C \"runMcp;mcpPort={INTERNAL_PORT}\"",
+        "upstreamMode":  "external-http",
+        "upstreamHost":  "localhost",
+        "upstreamStartupTimeoutSeconds":  120,
+        "entry":  "",
+        "rawCommandArguments":  [
+
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\vanessa-automation\\server",
+        "internalPort":  9874,
+        "externalPort":  11509,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\vanessa-automation\\mcp.err.log",
+        "installMethod":  "git",
+        "npmPackage":  "",
+        "gitRepository":  "https://github.com/Pr-Mex/vanessa-automation.git",
+        "builtinTemplate":  "vanessa-automation",
+        "install":  {
+                        "postInstallCommand":  "resource:Installers.vanessa-automation"
+                    },
+        "installVariables":  [
+                                 {
+                                     "name":  "{VA_1CV8C_PATH}",
+                                     "value":  "",
+                                     "description":  "path to 1cv8c.exe for the 1C test manager session",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{VA_TEST_MANAGER_CONNECTION_ARGS}",
+                                     "value":  "",
+                                     "description":  "1C test manager connection arguments, for example /IBName\"TestManager\" or /IBConnectionString \"Srvr=\"\"host\"\";Ref=\"\"base\"\";\"",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{VA_TEST_CLIENT_CONNECTION_ARGS}",
+                                     "value":  "",
+                                     "description":  "1C tested client infobase connection arguments for VAExtension, for example /IBName\"TestClient\" or /IBConnectionString \"Srvr=\"\"host\"\";Ref=\"\"base\"\";\"",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{VA_IBCMD_PATH}",
+                                     "value":  "",
+                                     "description":  "path to ibcmd.exe from the same 1C platform version, used for extension property changes",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{VA_TEST_MANAGER_IBCMD_ARGS}",
+                                     "value":  "",
+                                     "description":  "ibcmd connection arguments for the test manager infobase, for example --data \"C:\\path\\ibcmd-data\" --dbms PostgreSQL --database-server \"localhost port=5432\" --database-name base --database-user user --database-password password",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{VA_TEST_CLIENT_IBCMD_ARGS}",
+                                     "value":  "",
+                                     "description":  "ibcmd connection arguments for the tested client infobase, for example --data \"C:\\path\\ibcmd-data\" --dbms PostgreSQL --database-server \"localhost port=5432\" --database-name base --database-user user --database-password password",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{VA_AUTOMATION_EPF}",
+                                     "value":  "{APP_DIR}\\mcps\\vanessa-automation\\.install\\vanessa-automation.1.2.043.28\\vanessa-automation\\vanessa-automation.epf",
+                                     "description":  "path to downloaded Vanessa Automation epf",
+                                     "promptOnInstall":  false
+                                 },
+                                 {
+                                     "name":  "{VA_MCP_EXTENSION_PATH}",
+                                     "value":  "{APP_DIR}\\mcps\\vanessa-automation\\.install\\client_mcp.cfe",
+                                     "description":  "path to downloaded client_mcp.cfe installed into the test manager infobase",
+                                     "promptOnInstall":  false
+                                 },
+                                 {
+                                     "name":  "{VA_MCP_EXTENSION_NAME}",
+                                     "value":  "client_mcp",
+                                     "description":  "1C extension name for the MCP extension in the test manager infobase",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{VA_EXTENSION_PATH}",
+                                     "value":  "{APP_DIR}\\mcps\\vanessa-automation\\.install\\VAExtension.1.29.cfe",
+                                     "description":  "path to downloaded VAExtension cfe installed into the tested client infobase",
+                                     "promptOnInstall":  false
+                                 },
+                                 {
+                                     "name":  "{VA_EXTENSION_NAME}",
+                                     "value":  "VAExtension",
+                                     "description":  "1C extension name for VAExtension in the tested client infobase",
+                                     "promptOnInstall":  true
+                                 }
+                             ],
+        "commands":  [
+                         {
+                             "title":  "Check 1C platform path",
+                             "command":  "powershell.exe",
+                             "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$p=\u0027{VA_1CV8C_PATH}\u0027; if([string]::IsNullOrWhiteSpace($p)){ throw \u00271cv8c.exe path is not configured\u0027 }; if(Test-Path -LiteralPath $p -PathType Leaf){ Write-Output (\u0027OK: 1cv8c.exe exists: \u0027 + $p) } else { throw (\u00271cv8c.exe was not found at \u0027 + $p) }\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check Vanessa Automation file",
+                             "command":  "powershell.exe",
+                             "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$p=\u0027{VA_AUTOMATION_EPF}\u0027; if([string]::IsNullOrWhiteSpace($p)){ throw \u0027Vanessa Automation file path is not configured\u0027 }; if(Test-Path -LiteralPath $p -PathType Leaf){ Write-Output (\u0027OK: Vanessa Automation file exists: \u0027 + $p) } else { throw (\u0027Vanessa Automation file was not found at \u0027 + $p) }\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check ibcmd path",
+                             "command":  "powershell.exe",
+                             "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$p=\u0027{VA_IBCMD_PATH}\u0027; if([string]::IsNullOrWhiteSpace($p)){ throw \u0027ibcmd.exe path is not configured\u0027 }; if(Test-Path -LiteralPath $p -PathType Leaf){ Write-Output (\u0027OK: ibcmd.exe exists: \u0027 + $p) } else { throw (\u0027ibcmd.exe was not found at \u0027 + $p) }\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check MCP extension file",
+                             "command":  "powershell.exe",
+                             "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$p=\u0027{VA_MCP_EXTENSION_PATH}\u0027; if([string]::IsNullOrWhiteSpace($p)){ throw \u0027client MCP extension file path is not configured\u0027 }; if(Test-Path -LiteralPath $p -PathType Leaf){ Write-Output (\u0027OK: client MCP extension file exists: \u0027 + $p) } else { throw (\u0027client MCP extension file was not found at \u0027 + $p) }\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check VAExtension file",
+                             "command":  "powershell.exe",
+                             "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$p=\u0027{VA_EXTENSION_PATH}\u0027; if([string]::IsNullOrWhiteSpace($p)){ throw \u0027VAExtension file path is not configured\u0027 }; if(Test-Path -LiteralPath $p -PathType Leaf){ Write-Output (\u0027OK: VAExtension file exists: \u0027 + $p) } else { throw (\u0027VAExtension file was not found at \u0027 + $p) }\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "Title":  "{1} Install/Update manager MCP extension",
+                             "Command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "Arguments":  "--scenario-install-vanessa-mcp-extension --mcp vanessa-automation --manager-mcp-extension",
+                             "Log":  true,
+                             "Background":  false,
+                             "Confirmation":  true,
+                             "AllowedWhileRunning":  false
+                         },
+                         {
+                             "Title":  "{2} Install/Update test client VAExtension",
+                             "Command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "Arguments":  "--scenario-install-vanessa-vaextension --mcp vanessa-automation --test-client-vaextension",
+                             "Log":  true,
+                             "Background":  false,
+                             "Confirmation":  true,
+                             "AllowedWhileRunning":  false
+                         },
+                         {
+                             "Title":  "{3} Probe manager MCP extension",
+                             "Command":  "{VA_1CV8C_PATH}",
+                             "Arguments":  "DESIGNER {VA_TEST_MANAGER_CONNECTION_ARGS} /DisableStartupDialogs /DumpCfg \"{APP_DIR}\\mcps\\vanessa-automation\\.generated\\probes\\manager-mcp-extension.cfe\" -Extension \"{VA_MCP_EXTENSION_NAME}\" /Out \"{APP_DIR}\\logs\\control-center\\vanessa-automation\\probe-mcp-extension.1c.log\"",
+                             "Log":  true,
+                             "Background":  false,
+                             "Confirmation":  true,
+                             "AllowedWhileRunning":  false
+                         },
+                         {
+                             "Title":  "{4} Probe test client VAExtension",
+                             "Command":  "{VA_1CV8C_PATH}",
+                             "Arguments":  "DESIGNER {VA_TEST_CLIENT_CONNECTION_ARGS} /DisableStartupDialogs /DumpCfg \"{APP_DIR}\\mcps\\vanessa-automation\\.generated\\probes\\test-client-vaextension.cfe\" -Extension \"{VA_EXTENSION_NAME}\" /Out \"{APP_DIR}\\logs\\control-center\\vanessa-automation\\probe-vaextension.1c.log\"",
+                             "Log":  true,
+                             "Background":  false,
+                             "Confirmation":  true,
+                             "AllowedWhileRunning":  false
+                         },
+                         {
+                             "Title":  "{5} Unlock manager MCP extension flags",
+                             "Command":  "{VA_IBCMD_PATH}",
+                             "Arguments":  "extension update {VA_TEST_MANAGER_IBCMD_ARGS} --name \"{VA_MCP_EXTENSION_NAME}\" --active=yes --safe-mode=no --unsafe-action-protection=no",
+                             "Log":  true,
+                             "Background":  false,
+                             "Confirmation":  true,
+                             "AllowedWhileRunning":  false
+                         },
+                         {
+                             "Title":  "{6} Unlock test client VAExtension flags",
+                             "Command":  "{VA_IBCMD_PATH}",
+                             "Arguments":  "extension update {VA_TEST_CLIENT_IBCMD_ARGS} --name \"{VA_EXTENSION_NAME}\" --active=yes --safe-mode=no --unsafe-action-protection=no",
+                             "Log":  true,
+                             "Background":  false,
+                             "Confirmation":  true,
+                             "AllowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "MCP tools/list probe",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--scenario-connectivity-smoke --mcp vanessa-automation --url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check Vanessa MCP root",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--scenario-connectivity-smoke --mcp vanessa-automation --url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\" --root \"http://127.0.0.1:{INTERNAL_PORT}/\" --expect-root \"MCP server\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check Vanessa state",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--scenario-connectivity-smoke --mcp vanessa-automation --url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\" --tool get_VanessaAutomation_state",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check test client windows",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--scenario-connectivity-smoke --mcp vanessa-automation --url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\" --tool get_window_list_testclient",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check command interface",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--scenario-connectivity-smoke --mcp vanessa-automation --url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\" --tool manage_command_interface --tool-args \"{\"\"action\"\":\"\"get_all\"\"}\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check active form",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--scenario-connectivity-smoke --mcp vanessa-automation --url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\" --tool get_form_analysis --tool-args \"{\"\"format\"\":\"\"elements\"\"}\"",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         }
+                     ]
+    },
+    {
+        "id":  "control-center-admin",
+        "name":  "Control Center Admin",
+        "enabled":  false,
+        "command":  "",
+        "entry":  "{APP_DIR}\\McpControlCenter.exe",
+        "rawCommandArguments":  [
+                                    "--admin-mcp",
+                                    "--admin-root",
+                                    "{APP_DIR}"
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\control-center-admin\\server",
+        "internalPort":  11608,
+        "externalPort":  11508,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\control-center-admin\\mcp.err.log",
+        "installMethod":  "none",
+        "npmPackage":  "",
+        "gitRepository":  "",
+        "builtinTemplate":  "control-center-admin",
+        "commands":  [
+                         {
+                             "title":  "Check Admin MCP",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--admin-mcp-self-test",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         }
+                     ]
+    },
+    {
+        "id":  "onec-database",
+        "name":  "1C Database Manager",
+        "enabled":  false,
+        "command":  "",
+        "entry":  "{APP_DIR}\\McpControlCenter.exe",
+        "rawCommandArguments":  [
+                                    "--onec-db-mcp",
+                                    "--onec-db-root",
+                                    "{APP_DIR}"
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\onec-database\\server",
+        "internalPort":  11610,
+        "externalPort":  11510,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\onec-database\\mcp.err.log",
+        "installMethod":  "git",
+        "npmPackage":  "",
+        "gitRepository":  "{APP_DIR}\\builtin\\onec-database",
+        "builtinTemplate":  "onec-database",
+        "commands":  [
+                         {
+                             "title":  "Check 1C Database MCP",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--onec-db-mcp-self-test",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Wait smoke 30s",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--onec-db-wait-smoke-test --durations 30",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Wait smoke 2m",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--onec-db-wait-smoke-test --durations 120",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Wait smoke 5m",
+                             "command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "arguments":  "--onec-db-wait-smoke-test --durations 300",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         }
+                     ]
+    },
+    {
+        "id":  "1c-vector-search",
+        "name":  "1C Vector Search",
+        "enabled":  false,
+        "command":  "",
+        "entry":  ".runtime\\python\\python.exe",
+        "rawCommandArguments":  [
+                                    "run_server.py"
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\1c-vector-search\\server",
+        "internalPort":  11607,
+        "externalPort":  11507,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\1c-vector-search\\mcp.err.log",
+        "environment":  {
+                            "PROJECT_PROFILE":  "{ONEC_PROFILE}",
+                            "EMBEDDING_MODEL":  "{EMBEDDING_MODEL}",
+                            "VECTORDB_PATH":  "{APP_DIR}\\mcps\\1c-vector-search\\.generated\\projects\\{ONEC_PROFILE}\\vectordb",
+                            "GRAPHDB_PATH":  "{APP_DIR}\\mcps\\1c-vector-search\\.generated\\projects\\{ONEC_PROFILE}\\graphdb\\graph.db",
+                            "MCP_GENERATED_DIR":  "{APP_DIR}\\mcps\\1c-vector-search\\.generated"
+                        },
+        "installMethod":  "git",
+        "npmPackage":  "",
+        "gitRepository":  "https://github.com/KvitunAA/1c-vector-search.git",
+        "install":  {
+                        "postInstallCommand":  "resource:Installers.1c-vector-search"
+                    },
+        "installVariables":  [
+                                 {
+                                     "name":  "{ONEC_PROFILE}",
+                                     "value":  "",
+                                     "description":  "Р В РЎвЂР В РЎВР РЋР РЏ Р В РЎвЂ”Р РЋР вЂљР В РЎвЂўР РЋРІР‚С›Р В РЎвЂР В Р’В»Р РЋР РЏ 1C Vector Search",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{ONEC_CONFIG_PATH}",
+                                     "value":  "",
+                                     "description":  "Р В РЎвЂ”Р РЋРЎвЂњР РЋРІР‚С™Р РЋР Р‰ Р В РЎвЂќ Р В Р вЂ Р РЋРІР‚в„–Р В РЎвЂ“Р РЋР вЂљР РЋРЎвЂњР В Р’В·Р В РЎвЂќР В Р’Вµ Р В РЎвЂќР В РЎвЂўР В Р вЂ¦Р РЋРІР‚С›Р В РЎвЂР В РЎвЂ“Р РЋРЎвЂњР РЋР вЂљР В Р’В°Р РЋРІР‚В Р В РЎвЂР В РЎвЂ 1Р В Р Р‹ Р В РўвЂР В Р’В»Р РЋР РЏ Р В РЎвЂ”Р РЋР вЂљР В РЎвЂўР РЋРІР‚С›Р В РЎвЂР В Р’В»Р РЋР РЏ 1C Vector Search",
+                                     "promptOnInstall":  true
+                                 },
+                                 {
+                                     "name":  "{EMBEDDING_MODEL}",
+                                     "value":  "",
+                                     "description":  "Р В РЎвЂР В РЎВР РЋР РЏ embedding-Р В РЎВР В РЎвЂўР В РўвЂР В Р’ВµР В Р’В»Р В РЎвЂ 1C Vector Search",
+                                     "promptOnInstall":  true
+                                 }
+                             ],
+        "commands":  [
+                         {
+                             "title":  "Create profile",
+                             "command":  ".runtime\\python\\python.exe",
+                             "arguments":  "init_project.py --name {ONEC_PROFILE} --config \"{ONEC_CONFIG_PATH}\" --yes",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "Index all",
+                             "command":  ".runtime\\python\\python.exe",
+                             "arguments":  "run_index_all.py",
+                             "log":  true,
+                             "background":  true,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "Index vector",
+                             "command":  ".runtime\\python\\python.exe",
+                             "arguments":  "run_indexer.py --clear --vector-only",
+                             "log":  true,
+                             "background":  true,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         },
+                         {
+                             "title":  "Index graph",
+                             "command":  ".runtime\\python\\python.exe",
+                             "arguments":  "index_graph_mp.py --workers 8",
+                             "log":  true,
+                             "background":  true,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  false
+                         }
+                     ]
+    }
+]
