@@ -51,7 +51,9 @@ Before connecting a client, make sure the Vanessa Automation side is prepared:
 - `VAExtension*.cfe` is installed in the tested infobase;
 - the MCP endpoint answers `tools/list`.
 
-Control Center exposes this as one `Vanessa Automation MCP` profile. The profile **Install** action clones Vanessa Automation and downloads the required release artifacts into `mcps\vanessa-automation\.install`. In **Edit -> Install** configure the 1C paths/infobases and extension names. The numbered profile commands can install the MCP extension into the manager base and VAExtension into the tested client base separately. These commands require confirmation because they update 1C infobases.
+Control Center exposes this as one `Vanessa Automation MCP` profile. The profile **Install** action clones Vanessa Automation and downloads the required release artifacts into `mcps\vanessa-automation\.install`. In **Edit -> Install** configure the 1C start path, the test manager start arguments, extension names, and the names of two `1C Database Manager` projects: one for the manager infobase and one for the tested client infobase.
+
+The numbered profile commands install/update the MCP extension and VAExtension through `1C Database Manager`. The manager projects hold the actual `1cv8/ibcmd` paths and database connection arguments. These commands require confirmation because they update 1C infobases.
 
 If Vanessa Automation is already running its MCP server on the configured upstream host/internal port, Control Center can adopt it. For the current local Vanessa server this is `localhost:9874`, but these are profile settings, not global defaults. If a matching 1C/Vanessa process is already running but the port is not open yet, Control Center waits for that process instead of launching a duplicate 1C session. Only when no matching process is found does Start use the configured 1C command to open Vanessa Automation with `runMcp`.
 

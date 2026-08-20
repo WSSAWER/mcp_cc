@@ -240,27 +240,15 @@
                                      "promptOnInstall":  true
                                  },
                                  {
-                                     "name":  "{VA_TEST_CLIENT_CONNECTION_ARGS}",
+                                     "name":  "{VA_TEST_MANAGER_DB_PROJECT}",
                                      "value":  "",
-                                     "description":  "1C tested client infobase connection arguments for VAExtension, for example /IBName\"TestClient\" or /IBConnectionString \"Srvr=\"\"host\"\";Ref=\"\"base\"\";\"",
+                                     "description":  "1C Database Manager project name for the Vanessa test manager infobase",
                                      "promptOnInstall":  true
                                  },
                                  {
-                                     "name":  "{VA_IBCMD_PATH}",
+                                     "name":  "{VA_TEST_CLIENT_DB_PROJECT}",
                                      "value":  "",
-                                     "description":  "path to ibcmd.exe from the same 1C platform version, used for extension property changes",
-                                     "promptOnInstall":  true
-                                 },
-                                 {
-                                     "name":  "{VA_TEST_MANAGER_IBCMD_ARGS}",
-                                     "value":  "",
-                                     "description":  "ibcmd connection arguments for the test manager infobase, for example --data \"C:\\path\\ibcmd-data\" --dbms PostgreSQL --database-server \"localhost port=5432\" --database-name base --database-user user --database-password password",
-                                     "promptOnInstall":  true
-                                 },
-                                 {
-                                     "name":  "{VA_TEST_CLIENT_IBCMD_ARGS}",
-                                     "value":  "",
-                                     "description":  "ibcmd connection arguments for the tested client infobase, for example --data \"C:\\path\\ibcmd-data\" --dbms PostgreSQL --database-server \"localhost port=5432\" --database-name base --database-user user --database-password password",
+                                     "description":  "1C Database Manager project name for the tested client infobase",
                                      "promptOnInstall":  true
                                  },
                                  {
@@ -314,15 +302,6 @@
                              "allowedWhileRunning":  true
                          },
                          {
-                             "title":  "Check ibcmd path",
-                             "command":  "powershell.exe",
-                             "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$p=\u0027{VA_IBCMD_PATH}\u0027; if([string]::IsNullOrWhiteSpace($p)){ throw \u0027ibcmd.exe path is not configured\u0027 }; if(Test-Path -LiteralPath $p -PathType Leaf){ Write-Output (\u0027OK: ibcmd.exe exists: \u0027 + $p) } else { throw (\u0027ibcmd.exe was not found at \u0027 + $p) }\"",
-                             "log":  true,
-                             "background":  false,
-                             "confirmation":  false,
-                             "allowedWhileRunning":  true
-                         },
-                         {
                              "title":  "Check MCP extension file",
                              "command":  "powershell.exe",
                              "arguments":  "-NoProfile -ExecutionPolicy Bypass -Command \"$p=\u0027{VA_MCP_EXTENSION_PATH}\u0027; if([string]::IsNullOrWhiteSpace($p)){ throw \u0027client MCP extension file path is not configured\u0027 }; if(Test-Path -LiteralPath $p -PathType Leaf){ Write-Output (\u0027OK: client MCP extension file exists: \u0027 + $p) } else { throw (\u0027client MCP extension file was not found at \u0027 + $p) }\"",
@@ -343,7 +322,7 @@
                          {
                              "Title":  "{1} Install/Update manager MCP extension",
                              "Command":  "{APP_DIR}\\McpControlCenter.exe",
-                             "Arguments":  "--scenario-install-vanessa-mcp-extension --mcp vanessa-automation --manager-mcp-extension",
+                             "Arguments":  "--onec-db-install-extension --project \"{VA_TEST_MANAGER_DB_PROJECT}\" --extension-file \"{VA_MCP_EXTENSION_PATH}\" --extension-name \"{VA_MCP_EXTENSION_NAME}\"",
                              "Log":  true,
                              "Background":  false,
                              "Confirmation":  true,
@@ -352,7 +331,7 @@
                          {
                              "Title":  "{2} Install/Update test client VAExtension",
                              "Command":  "{APP_DIR}\\McpControlCenter.exe",
-                             "Arguments":  "--scenario-install-vanessa-vaextension --mcp vanessa-automation --test-client-vaextension",
+                             "Arguments":  "--onec-db-install-extension --project \"{VA_TEST_CLIENT_DB_PROJECT}\" --extension-file \"{VA_EXTENSION_PATH}\" --extension-name \"{VA_EXTENSION_NAME}\"",
                              "Log":  true,
                              "Background":  false,
                              "Confirmation":  true,
@@ -368,27 +347,18 @@
                              "AllowedWhileRunning":  false
                          },
                          {
-                             "Title":  "{4} Probe test client VAExtension",
-                             "Command":  "{VA_1CV8C_PATH}",
-                             "Arguments":  "DESIGNER {VA_TEST_CLIENT_CONNECTION_ARGS} /DisableStartupDialogs /DumpCfg \"{APP_DIR}\\mcps\\vanessa-automation\\.generated\\probes\\test-client-vaextension.cfe\" -Extension \"{VA_EXTENSION_NAME}\" /Out \"{APP_DIR}\\logs\\control-center\\vanessa-automation\\probe-vaextension.1c.log\"",
+                             "Title":  "{4} Unlock manager MCP extension flags",
+                             "Command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "Arguments":  "--onec-db-update-extension-flags --project \"{VA_TEST_MANAGER_DB_PROJECT}\" --extension-name \"{VA_MCP_EXTENSION_NAME}\" --active yes --safe-mode no --unsafe-action-protection no",
                              "Log":  true,
                              "Background":  false,
                              "Confirmation":  true,
                              "AllowedWhileRunning":  false
                          },
                          {
-                             "Title":  "{5} Unlock manager MCP extension flags",
-                             "Command":  "{VA_IBCMD_PATH}",
-                             "Arguments":  "extension update {VA_TEST_MANAGER_IBCMD_ARGS} --name \"{VA_MCP_EXTENSION_NAME}\" --active=yes --safe-mode=no --unsafe-action-protection=no",
-                             "Log":  true,
-                             "Background":  false,
-                             "Confirmation":  true,
-                             "AllowedWhileRunning":  false
-                         },
-                         {
-                             "Title":  "{6} Unlock test client VAExtension flags",
-                             "Command":  "{VA_IBCMD_PATH}",
-                             "Arguments":  "extension update {VA_TEST_CLIENT_IBCMD_ARGS} --name \"{VA_EXTENSION_NAME}\" --active=yes --safe-mode=no --unsafe-action-protection=no",
+                             "Title":  "{5} Unlock test client VAExtension flags",
+                             "Command":  "{APP_DIR}\\McpControlCenter.exe",
+                             "Arguments":  "--onec-db-update-extension-flags --project \"{VA_TEST_CLIENT_DB_PROJECT}\" --extension-name \"{VA_EXTENSION_NAME}\" --active yes --safe-mode no --unsafe-action-protection no",
                              "Log":  true,
                              "Background":  false,
                              "Confirmation":  true,

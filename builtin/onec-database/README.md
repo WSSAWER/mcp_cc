@@ -13,6 +13,8 @@ mcps\onec-database\.generated\projects.json
 The MCP supports:
 
 - `ibcmd infobase config` operations: `generation_id`, `reset`, `apply`, `check`, `import`, `export`, `custom`;
+- extension installation/update through `1cv8 DESIGNER`: `/LoadCfg`, `/UpdateDBCfg`, `-Extension`;
+- extension flag updates through `ibcmd extension update`: `active`, `safe-mode`, `unsafe-action-protection`;
 - 1C Designer configuration repository operations: `create`, `add_user`, `unbind_cfg`, `update_cfg`, `dump_cfg`, `report`, `lock`, `unlock`, `commit`, `set_label`, `custom`;
 - long-running command execution with `timeoutSeconds`;
 - safe argument-array command construction without shell.
