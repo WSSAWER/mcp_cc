@@ -15,7 +15,7 @@ Control Center provides one preferred endpoint for clients:
 
 - **Unified URL**: one Streamable HTTP MCP endpoint that aggregates tools from every currently running Active MCP.
 
-Use **Copy unified URL** in the toolbar or row context menu. By default it is `http://<Gate bind IP>:11500/mcp`, with the port configured in **Unified port**.
+Use **Services -> Copy unified URL**. By default it is `http://<Gate bind IP>:11500/mcp`, with the port configured in **Unified port**.
 
 Each MCP also keeps two diagnostic/compatibility endpoints:
 
@@ -26,7 +26,6 @@ Use the row context menu:
 
 - **Copy internal URL** copies the local upstream MCP URL.
 - **Copy Gate URL** copies the configured gate MCP URL.
-- **Copy unified URL** copies the preferred single MCP URL.
 
 For network access, set **Gate bind IP**, save it, run **Services -> Enable network access**, then restart already-running MCPs if their individual gate bind changed. Use the copied Unified URL in the MCP client. The unified endpoint lists only MCPs that are enabled and already running; it does not auto-start MCPs.
 

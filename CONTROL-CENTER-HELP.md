@@ -2,7 +2,7 @@
 
 MCP Control Center manages local MCP servers and the built-in HTTP gate. It does not configure AI models, llama-server slots, GPU, model context, or artificial MCP connection limits.
 
-For MCP clients, the preferred connection is the toolbar **Copy unified URL** address. It exposes one `/mcp` endpoint with tools from every Active MCP that is currently running.
+For MCP clients, the preferred connection is the **Services -> Copy unified URL** address. It exposes one `/mcp` endpoint with tools from every Active MCP that is currently running.
 
 ## Main screen
 
@@ -18,7 +18,6 @@ For MCP clients, the preferred connection is the toolbar **Copy unified URL** ad
 - **Start / Stop / Restart / Check** affects only the clicked MCP row.
 - **Copy internal URL** copies the local upstream MCP URL.
 - **Copy Gate URL** copies the configured gate MCP URL.
-- **Copy unified URL** copies the single aggregated MCP URL for all currently running MCPs.
 - **Edit** opens MCP settings. For not-installed MCPs, only install/config/command settings are editable.
 - **Install** downloads or restores a missing MCP from its configured npm/Git/built-in source. It does not start the MCP.
 - **Update / Reinstall -> Program** removes program files and temporary install files, keeps generated files, then installs again.
@@ -60,6 +59,7 @@ Control Center action logs are stored under `logs\control-center\<mcp-id>`. MCP 
 ## Services menu
 
 - **Add MCP** adds a shared MCP definition. Install files afterwards if an npm package, Git URL, Python install, or built-in source is configured.
+- **Copy unified URL** copies the single aggregated MCP URL for all currently running MCPs.
 - **Update all MCP configurations** downloads the latest `mcp_configs.json` from the same configured update Git payload used for Control Center releases. It updates MCP commands and product metadata and adds new shared MCP definitions. It keeps local paths, ports, Active flags, runtime folders, and install variable values.
 - **Gate** saves the bind IP, unified MCP port, and output limit. The unified endpoint restarts immediately; individual MCP gates use changed settings on next Start/Restart.
 - **Enable network access** adds Windows Firewall rules for configured individual gate ports and the unified MCP port. Already-running MCPs must be restarted to use a changed bind IP.
