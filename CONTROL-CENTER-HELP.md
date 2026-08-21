@@ -76,6 +76,12 @@ The admin token is generated locally on first use:
 
 The token is the admin password. Do not paste it into public logs or shared chats. Give it to an AI agent only through the MCP client configuration or as the `token` argument for admin tools in a trusted local session.
 
+Unified MCP hides admin tools by default. To expose them in Unified `tools/list`, pass the token as a Bearer token:
+
+- `Authorization: Bearer <token>`
+
+No URL token, custom header, or `initialize.params` token is supported. In Bearer-authorized Unified sessions, admin tool calls receive the token internally and do not expose a `token` argument in `tools/list`.
+
 Admin tool calls are audited here:
 
 - `logs\control-center\admin-mcp-audit.jsonl`

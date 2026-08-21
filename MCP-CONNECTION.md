@@ -58,6 +58,16 @@ If Vanessa Automation is already running its MCP server on the configured upstre
 
 The profile stores full 1C connection arguments, not only an infobase string. Use `/IBName"BaseName"` for a registered local base, or `/IBConnectionString "..."` when the base is configured by connection string.
 
+## Control Center Admin through Unified
+
+The built-in `Control Center Admin` MCP is hidden from Unified `tools/list` unless the client provides the local admin token.
+
+Preferred access method:
+
+- HTTP header `Authorization: Bearer <token>`
+
+No URL token, custom header, or `initialize.params` token is supported. With no Bearer token, Unified exposes only regular MCP tools. With the Bearer token, Unified exposes regular tools plus `control-center-admin.*`. In Bearer-authorized Unified sessions, admin tool calls receive the token internally and do not expose a `token` argument in `tools/list`.
+
 Known Vanessa MCP contract:
 
 - health root: `GET http://<host>:<port>/` -> `200 text/plain` with `MCP server`;
