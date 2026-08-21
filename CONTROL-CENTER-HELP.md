@@ -60,6 +60,7 @@ Control Center action logs are stored under `logs\control-center\<mcp-id>`. MCP 
 ## Services menu
 
 - **Add MCP** adds a shared MCP definition. Install files afterwards if an npm package, Git URL, Python install, or built-in source is configured.
+- **Update all MCP configurations** downloads the latest `mcp_configs.json` from the same configured update Git payload used for Control Center releases. It updates MCP commands and product metadata and adds new shared MCP definitions. It keeps local paths, ports, Active flags, runtime folders, and install variable values.
 - **Gate** saves the bind IP, unified MCP port, and output limit. The unified endpoint restarts immediately; individual MCP gates use changed settings on next Start/Restart.
 - **Enable network access** adds Windows Firewall rules for configured individual gate ports and the unified MCP port. Already-running MCPs must be restarted to use a changed bind IP.
 - **Update Control Center from Git** clones or updates the configured update payload repository, closes the current UI, copies only Control Center application files, and starts the updated executable. The repository must contain the portable update files in its root, not the full source project. It keeps `mcps`, `logs`, runtime PID files, gate settings, and admin token. Existing `mcp_configs.json` is read and re-saved through the app JSON serializer; new MCP definitions from the updated default config are added without overwriting existing local definitions.
