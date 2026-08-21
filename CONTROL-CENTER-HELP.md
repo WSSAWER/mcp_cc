@@ -9,6 +9,7 @@ For MCP clients, the preferred connection is the **Services -> Copy unified URL*
 - **Active** includes the MCP in bulk Start/Restart actions.
 - **Status** is based on saved PID first, then process/port discovery.
 - **Health**, **Commands**, and **Gate** are checked only while the MCP is running.
+- **Gate** reports what Control Center can prove: `Local` means loopback-only, `Bound?` means the gate is listening locally but remote access was not verified, `Remote` means the configured external probe reached the gate, `Blocked` means that probe failed, `No bind` means the gate is not listening on the configured IP/port, and `Unavailable` means the gate check failed.
 - **Internal port** is the local upstream port used by the worker.
 - **External port** is the gate port used by MCP clients.
 - **Last message** shows the latest useful process, health, command, or install message.
@@ -62,7 +63,8 @@ Control Center action logs are stored under `logs\control-center\<mcp-id>`. MCP 
 - **Copy unified URL** copies the single aggregated MCP URL for all currently running MCPs.
 - **Update all MCP configurations** downloads the latest `mcp_configs.json` from the same configured update Git payload used for Control Center releases. It updates MCP commands and product metadata and adds new shared MCP definitions. It keeps local paths, ports, Active flags, runtime folders, and install variable values.
 - **Gate** saves the bind IP, unified MCP port, and output limit. The unified endpoint restarts immediately; individual MCP gates use changed settings on next Start/Restart.
-- **Enable network access** adds Windows Firewall rules for configured individual gate ports and the unified MCP port. Already-running MCPs must be restarted to use a changed bind IP.
+- **Gate remote check settings** saves an optional public host and remote probe URL. The probe URL can use `{url}`, `{host}`, `{port}`, and `{path}` placeholders; a 2xx probe response changes Gate to `Remote`.
+- **Enable network access** adds Windows Firewall rules for configured individual gate ports and the unified MCP port. Already-running MCPs must be restarted to use a changed bind IP. A local `Bound?` status still requires a remote probe or checking the copied URL from another device because firewall profile, VPN, router, and host network policy can block remote clients.
 - **Update Control Center from Git** clones or updates the configured update payload repository, closes the current UI, copies only Control Center application files, and starts the updated executable. The repository must contain the portable update files in its root, not the full source project. It keeps `mcps`, `logs`, runtime PID files, gate settings, and admin token. Existing `mcp_configs.json` is read and re-saved through the app JSON serializer; new MCP definitions from the updated default config are added without overwriting existing local definitions.
 - **Add npm/Git/Python to PATH** registers an already installed tool in PATH. It does not install Node.js, Git, or Python.
 

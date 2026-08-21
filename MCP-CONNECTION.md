@@ -17,6 +17,8 @@ Control Center provides one preferred endpoint for clients:
 
 Use **Services -> Copy unified URL**. By default it is `http://<Gate bind IP>:11500/mcp`, with the port configured in **Unified port**.
 
+During `initialize`, the unified endpoint returns MCP `instructions`. They explain that tools are exposed as `<mcp-id>.<tool-name>` and that the client should call `tools/list` again after MCPs are started, stopped, enabled, disabled, installed, reinstalled, or updated. This is required because the unified endpoint is dynamic and aggregates only currently running enabled MCPs.
+
 Each MCP also keeps two diagnostic/compatibility endpoints:
 
 - **Internal URL**: direct local upstream URL, useful for local diagnostics.
@@ -28,6 +30,10 @@ Use the row context menu:
 - **Copy Gate URL** copies the configured gate MCP URL.
 
 For network access, set **Gate bind IP**, save it, run **Services -> Enable network access**, then restart already-running MCPs if their individual gate bind changed. Use the copied Unified URL in the MCP client. The unified endpoint lists only MCPs that are enabled and already running; it does not auto-start MCPs.
+
+The **Gate** column does not claim external reachability unless a remote probe is configured. `Local` means loopback-only. `Bound?` means the gate is listening locally, but another device still has to verify the URL. `Remote` means the configured probe reached the gate from outside this Control Center process. `Blocked` means that probe failed. `No bind` means the configured IP/port is not actually being listened on.
+
+Use **Services -> Gate remote check settings** when the address used by clients is not the local bind IP. Set **Public host** to the external IP/DNS name copied into client URLs. Set **Remote probe URL** to an external checker endpoint. The checker can receive placeholders: `{url}`, `{host}`, `{port}`, `{path}`. If no placeholders are present, Control Center appends `?url=<encoded-url>`.
 
 ## Configuration
 
