@@ -428,6 +428,7 @@
         "entry":  "{APP_DIR}\\McpControlCenter.exe",
         "rawCommandArguments":  [
                                     "--admin-mcp",
+                                    "--stdio-line-json",
                                     "--admin-root",
                                     "{APP_DIR}"
                                 ],
@@ -461,6 +462,7 @@
         "entry":  "{APP_DIR}\\McpControlCenter.exe",
         "rawCommandArguments":  [
                                     "--onec-db-mcp",
+                                    "--stdio-line-json",
                                     "--onec-db-root",
                                     "{APP_DIR}"
                                 ],
