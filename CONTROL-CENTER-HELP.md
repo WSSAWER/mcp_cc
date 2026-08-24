@@ -7,6 +7,7 @@ For MCP clients, the preferred connection is the **Services -> Copy unified URL*
 ## Main screen
 
 - **Active** includes the MCP in bulk Start/Restart actions.
+- **Start on launch** in **Edit -> Common** starts this MCP automatically when Control Center opens. **Active** still controls bulk Start/Restart and Unified visibility; it does not block an explicit Start on launch profile.
 - **Status** is based on saved PID first, then process/port discovery.
 - **Health**, **Commands**, and **Gate** are checked only while the MCP is running.
 - **Gate** reports what Control Center can prove: `Local` means loopback-only, `Bound?` means the gate is listening locally but remote access was not verified, `Remote` means the configured external probe reached the gate, `Blocked` means that probe failed, `No bind` means the gate is not listening on the configured IP/port, and `Unavailable` means the gate check failed.
@@ -32,6 +33,7 @@ For MCP clients, the preferred connection is the **Services -> Copy unified URL*
 The toolbar **Help** menu opens Control Center documentation from the application folder:
 
 - `CONTROL-CENTER-HELP.md` - this UI and folder-layout help.
+- `CONTROL-CENTER-CLI.md` - command line, SSH, and admin MCP reference.
 - `MCP-CONNECTION.md` - MCP client connection instructions.
 
 ## Install variables
@@ -70,7 +72,7 @@ Control Center action logs are stored under `logs\control-center\<mcp-id>`. MCP 
 
 ## Control Center Admin MCP
 
-`Control Center Admin` is a built-in C# MCP for administering this Control Center instance. It is disabled by default and must be started explicitly.
+`Control Center Admin` is a built-in C# MCP for administering this Control Center instance. In the default product config it is Active and marked **Start on launch**, so the admin service starts with Control Center. It is still hidden from Unified tools unless the client supplies the admin token.
 
 The admin token is generated locally on first use:
 
@@ -100,7 +102,26 @@ Initial admin tools:
 - `stop_mcp`
 - `restart_mcp`
 - `read_logs`
+- `update_mcp_configurations`
+- `update_control_center`
 - `run_command`
 - `audit_tail`
 
 `run_command` requires both a valid token and `dangerouslyAllow=true`, plus an explicit working directory and timeout.
+
+## Command line / SSH administration
+
+The same administrative backend is available from the executable for command line and SSH usage:
+
+- `McpControlCenter.exe --cli list`
+- `McpControlCenter.exe --cli status --id <mcp-id>`
+- `McpControlCenter.exe --cli start --id <mcp-id>`
+- `McpControlCenter.exe --cli stop --id <mcp-id>`
+- `McpControlCenter.exe --cli restart --id <mcp-id>`
+- `McpControlCenter.exe --cli update-config --id <mcp-id> --patch-json "{\"enabled\":true,\"startOnLaunch\":true}"`
+- `McpControlCenter.exe --cli update-configs`
+- `McpControlCenter.exe --cli update-app --apply`
+
+The CLI intentionally does not expose `run_command` / shell execution.
+
+The full CLI/admin reference is in `CONTROL-CENTER-CLI.md` next to the executable.

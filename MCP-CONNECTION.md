@@ -29,7 +29,7 @@ Use the row context menu:
 - **Copy internal URL** copies the local upstream MCP URL.
 - **Copy Gate URL** copies the configured gate MCP URL.
 
-For network access, set **Gate bind IP**, save it, run **Services -> Enable network access**, then restart already-running MCPs if their individual gate bind changed. Use the copied Unified URL in the MCP client. The unified endpoint lists only MCPs that are enabled and already running; it does not auto-start MCPs.
+For network access, set **Gate bind IP**, save it, run **Services -> Enable network access**, then restart already-running MCPs if their individual gate bind changed. Use the copied Unified URL in the MCP client. The unified endpoint lists only MCPs that are enabled and already running. MCP profiles with **Start on launch** enabled are started by Control Center when the application opens; **Active** controls Unified visibility and bulk Start/Restart, not this explicit autostart flag.
 
 The **Gate** column does not claim external reachability unless a remote probe is configured. `Local` means loopback-only. `Bound?` means the gate is listening locally, but another device still has to verify the URL. `Remote` means the configured probe reached the gate from outside this Control Center process. `Blocked` means that probe failed. `No bind` means the configured IP/port is not actually being listened on.
 

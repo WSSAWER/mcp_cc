@@ -423,7 +423,8 @@
     {
         "id":  "control-center-admin",
         "name":  "Control Center Admin",
-        "enabled":  false,
+        "enabled":  true,
+        "startOnLaunch":  true,
         "command":  "",
         "entry":  "{APP_DIR}\\McpControlCenter.exe",
         "rawCommandArguments":  [
