@@ -109,6 +109,12 @@ Initial admin tools:
 
 `run_command` requires both a valid token and `dangerouslyAllow=true`, plus an explicit working directory and timeout.
 
+## Skills Aggregator
+
+The optional **Skills Aggregator** profile installs from `https://github.com/WSSAWER/SkillsAggregator.git` and stores chat skills under `mcps\skills-aggregator\.generated\skills`. Use `list_skills` to discover canonical names plus short descriptions of what each skill does and when it applies. Use `get_skill(name)` to load a complete `SKILL.md` into a chat.
+
+`write_skill(name, description, markdown, overwrite)` accepts Markdown pasted or attached in chat, and `delete_skill(name)` removes a skill. Both tools are protected by the Skills Aggregator Bearer token. A complete skill, including its generated frontmatter, is limited to 60,000 characters. Start the MCP once to create `mcps\skills-aggregator\.generated\write-token.txt`, then use **Copy write Bearer token** from its context menu. Configure that value as the MCP connection Bearer token. Unified forwards the Bearer only to profiles that explicitly enable **Forward Bearer to tool calls**; it is not sent to ordinary MCPs.
+
 ## Command line / SSH administration
 
 The same administrative backend is available from the executable for command line and SSH usage:

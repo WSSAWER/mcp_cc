@@ -517,6 +517,51 @@
                      ]
     },
     {
+        "id":  "skills-aggregator",
+        "name":  "Skills Aggregator",
+        "enabled":  false,
+        "startOnLaunch":  false,
+        "command":  "node.exe server.js --host 127.0.0.1 --port {INTERNAL_PORT} --data-dir \"{APP_DIR}\\mcps\\skills-aggregator\\.generated\\skills\" --token-file \"{APP_DIR}\\mcps\\skills-aggregator\\.generated\\write-token.txt\"",
+        "upstreamMode":  "external-http",
+        "upstreamHost":  "127.0.0.1",
+        "upstreamStartupTimeoutSeconds":  30,
+        "forwardBearer":  true,
+        "entry":  "server.js",
+        "rawCommandArguments":  [
+
+                                ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\skills-aggregator\\server",
+        "internalPort":  11611,
+        "externalPort":  11511,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\skills-aggregator\\mcp.err.log",
+        "installMethod":  "git",
+        "npmPackage":  "",
+        "gitRepository":  "https://github.com/WSSAWER/SkillsAggregator.git",
+        "builtinTemplate":  "skills-aggregator",
+        "commands":  [
+                         {
+                             "title":  "Check Skills Aggregator",
+                             "command":  "node.exe",
+                             "arguments":  "server.js --self-test",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Copy write Bearer token",
+                             "command":  "powershell.exe",
+                             "arguments":  "-NoProfile -Command \"Get-Content -LiteralPath '{APP_DIR}\\mcps\\skills-aggregator\\.generated\\write-token.txt' -Raw | Set-Clipboard\"",
+                             "log":  false,
+                             "background":  false,
+                             "confirmation":  true,
+                             "allowedWhileRunning":  true
+                         }
+                     ]
+    },
+    {
         "id":  "1c-vector-search",
         "name":  "1C Vector Search",
         "enabled":  false,
