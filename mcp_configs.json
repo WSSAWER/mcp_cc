@@ -647,5 +647,53 @@
                              "allowedWhileRunning":  false
                          }
                      ]
+    },
+    {
+        "id":  "onec-debug",
+        "name":  "1C Debug MCP",
+        "enabled":  false,
+        "startOnLaunch":  false,
+        "command":  "",
+        "upstreamMode":  "",
+        "upstreamHost":  "127.0.0.1",
+        "upstreamStartupTimeoutSeconds":  30,
+        "forwardBearer":  false,
+        "entry":  "server.cjs",
+        "rawCommand":  "",
+        "rawCommandArguments":  [
+
+                                ],
+        "workerExecutable":  "node.exe",
+        "workerExtraArguments":  [
+
+                                  ],
+        "workerArguments":  [
+
+                             ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\onec-debug\\server",
+        "internalPort":  11612,
+        "externalPort":  11512,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\onec-debug\\mcp.err.log",
+        "environment":  {
+
+                        },
+        "installMethod":  "git",
+        "npmPackage":  "",
+        "gitRepository":  "https://github.com/WSSAWER/1c_debug_mcp.git",
+        "builtinTemplate":  "onec-debug",
+        "install":  {
+                        "postInstallCommand":  ""
+                    },
+        "installVariables":  [
+
+                             ],
+        "commands":  [
+
+                     ],
+        "configFiles":  [
+
+                        ]
     }
 ]
