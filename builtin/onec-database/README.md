@@ -16,12 +16,13 @@ The MCP supports:
 - extension installation/update through `1cv8 DESIGNER`: `/LoadCfg`, `/UpdateDBCfg`, `-Extension`;
 - extension flag updates through `ibcmd extension update`: `active`, `safe-mode`, `unsafe-action-protection`;
 - 1C Designer configuration repository operations: `create`, `add_user`, `unbind_cfg`, `update_cfg`, `dump_cfg`, `report`, `lock`, `unlock`, `commit`, `set_label`, `custom`;
+- recursive export from the information-base configuration: `export_infobase_object_recursive` discovers the metadata tree and exports the root plus its child forms, layouts, requisites, commands, and other child metadata as one managed operation;
 - long-running command execution with `timeoutSeconds`;
 - managed process operation tracking: `list_operations` shows operation id, PID, status, elapsed time and log path; `cancel_operation` terminates a running operation and its process tree;
 - background execution for long operations: pass `background=true` to `run_ibcmd`, `run_repository_command`, or `run_extension_update_flags` to return immediately with `operationId`;
 - safe argument-array command construction without shell.
 
-For partial repository operations, `objectsPath` must point to a text file with one repository object name per line. Use full 1C metadata names, for example:
+For partial repository operations, prefer `objects`, an array of full root metadata names. Control Center creates the required 1C XML selection and marks every root with `includeChildObjects=true`. `objectsPath` is an advanced alternative and must point to an existing XML selection in the 1C `Objects` format. Examples of root names:
 
 ```text
 Обработка.Потребности_ТОИР
@@ -29,6 +30,19 @@ For partial repository operations, `objectsPath` must point to a text file with 
 Документ.ЗаказПокупателя
 ```
 
-`dump_cfg` accepts `objectsPath` too: `outputPath` is the target dump path and `objectsPath` narrows the dump to the listed objects.
+`dump_cfg` exports a complete repository configuration and does not accept an object selection.
+
+To recursively export one object from the information-base configuration, call `export_infobase_object_recursive` with `project`, `objectName`, `outputPath`, and `allowExecution=true`. For example, `objectName=Обработка.Потребности_ТОИР` produces that root object and all its child metadata under `outputPath`. The operation:
+
+- uses hierarchical XML format;
+- first runs `/DumpConfigToFiles -configDumpInfoOnly` in a private `.generated` workspace;
+- selects the root and every child entry from `ConfigDumpInfo.xml` and writes a UTF-8 BOM `listFile`;
+- runs `/DumpConfigToFiles -listFile` into the requested folder;
+- exposes both platform processes as one managed operation with a single operation id, lease, queue position, timeout, and final status;
+- defaults to background execution and a one-hour timeout;
+- participates in the same persistent Designer lease and per-project queue as repository operations;
+- never clears the output folder and does not silently enable incremental `-update` mode.
+
+Use `list_operations` to read its active step, current/last PID, state, elapsed time, and log path. Use `cancel_operation` for a controlled process-tree termination.
 
 Repository project settings include designer connection arguments, repository address, repository user, and repository password. Passwords are never returned by `get_project`; only `repositoryPasswordConfigured` is returned.
