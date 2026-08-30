@@ -539,6 +539,7 @@
         "installMethod":  "git",
         "npmPackage":  "",
         "gitRepository":  "https://github.com/WSSAWER/SkillsAggregator.git",
+        "gitBranch":  "release",
         "builtinTemplate":  "skills-aggregator",
         "commands":  [
                          {

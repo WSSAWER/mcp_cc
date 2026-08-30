@@ -115,6 +115,8 @@ The optional **Skills Aggregator** profile installs from `https://github.com/WSS
 
 `write_skill(name, description, markdown, overwrite)` accepts Markdown pasted or attached in chat, and `delete_skill(name)` removes a skill. Both tools are protected by the Skills Aggregator Bearer token. A complete skill, including its generated frontmatter, is limited to 60,000 characters. Start the MCP once to create `mcps\skills-aggregator\.generated\write-token.txt`, then use **Copy write Bearer token** from its context menu. Configure that value as the MCP connection Bearer token. Unified forwards the Bearer only to profiles that explicitly enable **Forward Bearer to tool calls**; it is not sent to ordinary MCPs.
 
+When an MCP client cannot send a Bearer header, use `write_skill_by_code(code, name, description, markdown, overwrite)` or `delete_skill_by_code(code, name)`. The `code` value is the same private value from `write-token.txt`. A wrong code never creates, replaces, or deletes a skill. Prefer Bearer when the client supports it because an explicit tool argument can be retained in client-side conversation or request logs.
+
 ## Command line / SSH administration
 
 The same administrative backend is available from the executable for command line and SSH usage:
