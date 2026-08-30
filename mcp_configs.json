@@ -683,6 +683,7 @@
         "installMethod":  "git",
         "npmPackage":  "",
         "gitRepository":  "https://github.com/WSSAWER/1c_debug_mcp.git",
+        "gitBranch":  "release",
         "builtinTemplate":  "onec-debug",
         "install":  {
                         "postInstallCommand":  ""
