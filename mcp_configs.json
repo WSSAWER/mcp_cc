@@ -473,9 +473,9 @@
         "mcpPath":  "/mcp",
         "healthPath":  "/healthz",
         "errorLog":  "{APP_DIR}\\mcps\\onec-database\\mcp.err.log",
-        "installMethod":  "git",
+        "installMethod":  "builtin",
         "npmPackage":  "",
-        "gitRepository":  "{APP_DIR}\\builtin\\onec-database",
+        "gitRepository":  "",
         "builtinTemplate":  "onec-database",
         "commands":  [
                          {
