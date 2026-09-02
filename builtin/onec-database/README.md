@@ -12,15 +12,18 @@ mcps\onec-database\.generated\projects.json
 
 The MCP supports:
 
+- a project-first workflow: call `list_projects`, select a binding, then call `get_project_actions` to see which Designer, repository, ibcmd, and RAC actions are actually configured;
+- ready repository actions: `repository_get_objects`, `repository_update_objects`, `repository_lock_objects`, `repository_unlock_objects`, and `repository_commit_objects`; these accept a project name and action data while executable, infobase, repository address, and credentials come from the saved project;
 - `ibcmd infobase config` operations: `generation_id`, `reset`, `apply`, `check`, `import`, `export`, `custom`;
 - extension installation/update through `1cv8 DESIGNER`: `/LoadCfg`, `/UpdateDBCfg`, `-Extension`;
 - extension flag updates through `ibcmd extension update`: `active`, `safe-mode`, `unsafe-action-protection`;
 - 1C Designer configuration repository operations: `create`, `add_user`, `unbind_cfg`, `update_cfg`, `dump_cfg`, `report`, `lock`, `unlock`, `commit`, `set_label`, `custom`;
 - recursive export from the information-base configuration: `export_infobase_object_recursive` discovers the metadata tree and exports the root plus its child forms, layouts, requisites, commands, and other child metadata as one managed operation;
+- loading selected root objects into the information-base configuration: `infobase_load_objects` discovers the root XML and all child XML/BSL files in a hierarchical dump, creates the `listFile`, runs `/LoadConfigFromFiles`, and optionally `/UpdateDBCfg`;
 - RAS/RAC administration through the platform `rac.exe`: discovery of clusters and infobases, listing sessions for one configured infobase, and explicit termination of selected session UUIDs;
 - long-running command execution with `timeoutSeconds`;
 - managed process operation tracking: `list_operations` shows operation id, PID, status, elapsed time and log path; `cancel_operation` terminates a running operation and its process tree;
-- background execution for long operations: pass `background=true` to `run_ibcmd`, `run_repository_command`, or `run_extension_update_flags` to return immediately with `operationId`;
+- background execution for long operations: ready repository and load actions always return immediately with `operationId`; Advanced fallback commands support the explicit `background` option;
 - safe argument-array command construction without shell.
 
 For partial repository operations, prefer `objects`, an array of full root metadata names. Control Center creates the required 1C XML selection and marks every root with `includeChildObjects=true`. `objectsPath` is an advanced alternative and must point to an existing XML selection in the 1C `Objects` format. Examples of root names:
@@ -32,6 +35,19 @@ For partial repository operations, prefer `objects`, an array of full root metad
 ```
 
 `dump_cfg` exports a complete repository configuration and does not accept an object selection.
+
+## Normal object change workflow
+
+The normal flow does not require constructing a Designer command line:
+
+1. Select a saved project with `list_projects` and inspect available methods with `get_project_actions`.
+2. If the object comes from the repository, call `repository_get_objects`, then `repository_lock_objects` with full root names. Use `repository_update_objects` for a normal repository update.
+3. Export from the information-base with `export_infobase_object_recursive` when a hierarchical working dump is needed.
+4. Edit the resulting XML/BSL files with a filesystem or Git tool. Editing source text is intentionally not hidden inside a database command.
+5. Call `infobase_load_objects` with the dump folder and root object names. The MCP selects the complete file set and updates the database configuration by default.
+6. Call `repository_commit_objects` to commit the selected roots, or `repository_unlock_objects` to release them without a commit.
+
+`run_repository_command`, `build_repository_arguments`, `run_ibcmd`, and `build_ibcmd_arguments` are Advanced fallback tools for operations not represented by a ready action. They are not required for ordinary get/lock/load/commit work.
 
 To recursively export one object from the information-base configuration, call `export_infobase_object_recursive` with `project`, `objectName`, `outputPath`, and `allowExecution=true`. For example, `objectName=Обработка.Потребности_ТОИР` produces that root object and all its child metadata under `outputPath`. The operation:
 
