@@ -20,6 +20,7 @@ The MCP supports:
 - 1C Designer configuration repository operations: `create`, `add_user`, `unbind_cfg`, `update_cfg`, `dump_cfg`, `report`, `lock`, `unlock`, `commit`, `set_label`, `custom`;
 - recursive export from the information-base configuration: `export_infobase_object_recursive` discovers the metadata tree and exports the root plus its child forms, layouts, requisites, commands, and other child metadata as one managed operation;
 - loading selected root objects into the information-base configuration: `infobase_load_objects` discovers the root XML and all child XML/BSL files in a hierarchical dump, creates the `listFile`, runs `/LoadConfigFromFiles`, and optionally `/UpdateDBCfg`;
+- managed Git synchronization of complete configuration and extension XML dumps, with a durable last-successful commit and failure journal;
 - RAS/RAC administration through the platform `rac.exe`: discovery of clusters and infobases, listing sessions for one configured infobase, and explicit termination of selected session UUIDs;
 - long-running command execution with `timeoutSeconds`;
 - managed process operation tracking: `list_operations` shows operation id, PID, status, elapsed time and log path; `cancel_operation` terminates a running operation and its process tree;
@@ -48,6 +49,28 @@ The normal flow does not require constructing a Designer command line:
 6. Call `repository_commit_objects` to commit the selected roots, or `repository_unlock_objects` to release them without a commit.
 
 `run_repository_command`, `build_repository_arguments`, `run_ibcmd`, and `build_ibcmd_arguments` are Advanced fallback tools for operations not represented by a ready action. They are not required for ordinary get/lock/load/commit work.
+
+## Git synchronization
+
+Synchronization settings belong to a named 1C project. One project can contain a main `configuration` target and any number of named `extension` targets. Each target stores:
+
+- `gitRepositoryPath`: an existing local Git working tree;
+- `sourceRelativePath`: the configuration folder inside that repository, containing `Configuration.xml`;
+- `kind`: `configuration` or `extension`;
+- `extensionName`: the 1C extension name when `kind=extension`;
+- optional `scriptsDirectory`, for example `P:\Larta2\_1cTransition_main`.
+
+Use `inspect_git_sync_source` first. It returns the repository root, current branch/HEAD and candidate folders containing `Configuration.xml`. Save the selected folder with `upsert_sync_target`. The MCP never runs `git pull`, switches branches or changes the working tree: repository updating remains an explicit external Git operation.
+
+`sync_git_target` loads the exact committed HEAD represented by the selected folder. The first run performs a full XML import. Later runs calculate committed changes from the last successfully loaded commit and use `ibcmd config import files` with the absolute file list supplied through stdin, then run `config apply` and `config check`. A `Configuration.xml` change, deleted metadata or rewritten Git history switches the plan to a reviewed full load; rewritten history requires `forceFull=true`. A dirty selected source is rejected because it cannot be attributed to a commit hash.
+
+The successful hash is advanced only after import, apply and check all succeed. `get_sync_status` returns the current and last-successful hashes, pending changes and every failed attempt after the last success, including its attempted hash, error and log path. `get_sync_changes` returns the pending commit list and changed files without changing Git or 1C. The journal is stored under:
+
+```text
+mcps\onec-database\.generated\sync\<project>\<target>\history.json
+```
+
+If `scriptsDirectory` is configured, every synchronization refreshes UTF-8-with-BOM `sync.ps1` and `status.ps1` entry points there; `install_sync_scripts` can refresh them explicitly without loading 1C. They invoke the same Control Center workflow and contain only the executable/root/project/target references—database and repository passwords are not copied into scripts.
 
 To recursively export one object from the information-base configuration, call `export_infobase_object_recursive` with `project`, `objectName`, `outputPath`, and `allowExecution=true`. For example, `objectName=Обработка.Потребности_ТОИР` produces that root object and all its child metadata under `outputPath`. The operation:
 
