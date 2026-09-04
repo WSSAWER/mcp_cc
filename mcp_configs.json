@@ -697,5 +697,86 @@
         "configFiles":  [
 
                         ]
+    },
+    {
+        "id":  "task-overseer",
+        "name":  "Task Overseer",
+        "enabled":  false,
+        "startOnLaunch":  false,
+        "command":  "",
+        "upstreamMode":  "",
+        "upstreamHost":  "127.0.0.1",
+        "upstreamStartupTimeoutSeconds":  30,
+        "forwardBearer":  false,
+        "entry":  "TaskOverseer.exe",
+        "rawCommand":  "",
+        "rawCommandArguments":  [
+                                    "mcp",
+                                    "--config",
+                                    "{APP_DIR}\\mcps\\task-overseer\\.generated\\config.json"
+                                ],
+        "stopCommand":  "TaskOverseer.exe",
+        "stopArguments":  "stop-service --config \"{APP_DIR}\\mcps\\task-overseer\\.generated\\config.json\"",
+        "workerExecutable":  "node.exe",
+        "workerExtraArguments":  [
+
+                                  ],
+        "workerArguments":  [
+
+                             ],
+        "workingDirectory":  "{APP_DIR}\\mcps\\task-overseer\\server",
+        "internalPort":  11613,
+        "externalPort":  11513,
+        "mcpPath":  "/mcp",
+        "healthPath":  "/healthz",
+        "errorLog":  "{APP_DIR}\\mcps\\task-overseer\\mcp.err.log",
+        "environment":  {
+
+                        },
+        "installMethod":  "git",
+        "npmPackage":  "",
+        "gitRepository":  "https://github.com/WSSAWER/task_overseer.git",
+        "gitBranch":  "release",
+        "builtinTemplate":  "task-overseer",
+        "install":  {
+                        "postInstallCommand":  ""
+                    },
+        "installVariables":  [
+
+                             ],
+        "commands":  [
+                         {
+                             "title":  "Open UI",
+                             "command":  "TaskOverseer.exe",
+                             "arguments":  "show --config \"{APP_DIR}\\mcps\\task-overseer\\.generated\\config.json\"",
+                             "log":  false,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Hide UI",
+                             "command":  "TaskOverseer.exe",
+                             "arguments":  "hide --config \"{APP_DIR}\\mcps\\task-overseer\\.generated\\config.json\"",
+                             "log":  false,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         },
+                         {
+                             "title":  "Check Task Overseer",
+                             "command":  "TaskOverseer.exe",
+                             "arguments":  "mcp-self-test",
+                             "log":  true,
+                             "background":  false,
+                             "confirmation":  false,
+                             "allowedWhileRunning":  true
+                         }
+                     ],
+        "configFiles":  [
+                            {
+                                "path":  "{APP_DIR}\\mcps\\task-overseer\\.generated\\config.json"
+                            }
+                        ]
     }
 ]

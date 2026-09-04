@@ -117,6 +117,14 @@ The optional **Skills Aggregator** profile installs from `https://github.com/WSS
 
 When an MCP client cannot send a Bearer header, use `write_skill_by_code(code, name, description, markdown, overwrite)` or `delete_skill_by_code(code, name)`. The `code` value is the same private value from `write-token.txt`. A wrong code never creates, replaces, or deletes a skill. Prefer Bearer when the client supports it because an explicit tool argument can be retained in client-side conversation or request logs.
 
+## Task Overseer
+
+The optional **Task Overseer** profile installs the tested `release` branch from `https://github.com/WSSAWER/task_overseer.git`. One `TaskOverseer.exe` process owns both the stdio MCP server and its tray interface. Control Center starts it with the interface hidden and publishes the MCP through the normal worker, individual Gate, and Unified endpoint.
+
+Use **Open UI** and **Hide UI** from the MCP context menu to control the existing window without starting another server. Closing the window with the X button hides it; **Stop** in Control Center terminates the managed process. The queue configuration and SQLite state are stored under `mcps\task-overseer\.generated`, so a **Program** reinstall updates the EXE without deleting user settings or pending callbacks.
+
+The MCP can start before its queue is configured. In that state its callback tools remain available, while queue processing stays idle and the UI shows that configuration is required. Open the UI to configure the Apps Script endpoint, secret, spreadsheet, and task bindings. These values are machine/user settings and are intentionally absent from the distributed default configuration.
+
 ## Command line / SSH administration
 
 The same administrative backend is available from the executable for command line and SSH usage:
