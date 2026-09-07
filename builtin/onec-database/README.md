@@ -122,6 +122,22 @@ Use `list_operations` to read its active step, current/last PID, state, elapsed 
 
 Repository project settings include designer connection arguments, repository address, repository user, and repository password. Passwords are never returned by `get_project`; only `repositoryPasswordConfigured` is returned.
 
+## Command logs and files
+
+Every tool command is logged by default, including failures before process startup. All executable commands for the information base, database, Designer, repository, RAC and Git synchronization record operation ID, PID, steps, redacted arguments, stdout/stderr, exit status and error details. Designer's native `/Out` log is merged when its process finishes. Background execution continues appending to the original command log after the initial MCP reply.
+
+Use the following tools without any server filesystem access:
+
+- `list_command_logs`: find executions by exact `project`, `command`, or `operationId`; newest first. `limit` is 1–100; pass `nextCursor` as `before` for the next page.
+- `search_log`: supply `logId` and literal `text` (case-insensitive). Results contain line numbers; `startLine`/`nextLine` and `maxMatches` support continuation. Individual search snippets are bounded; they do not replace the complete log file.
+- `get_log_file`: supply `logId` to receive the complete UTF-8 `.log` file as an embedded MCP resource with base64 bytes. No remote drive mapping is required.
+
+For example: run `repository_update_objects`, save its `operationId` and `logId`, check `list_operations`, then call `search_log(logId, text="ERROR")` or `get_log_file(logId)`. If the initial reply was lost, find the execution through `list_command_logs(project, command="repository_update_objects")`. A log existing or reaching `endOfSnapshot` does not mean the operation completed: use its status in `list_operations`.
+
+Each tool reply also provides a `resource_link` and `structuredContent.logId`. Standard MCP clients can use `resources/list` and `resources/read`; Unified routes these requests using its returned resource URI. Full files are not truncated to a text-output limit. The client determines how to save/display a file resource. When an operation is still running, a file read returns the currently available snapshot; read again after completion for the final log.
+
+Files are retained across sessions and restarts under `logs/control-center/onec-database/files/<logId>.log`, next to the Control Center installation, not inside the reinstallable MCP program folder. Command name/project/creation metadata are stored in the same file, so lookup does not depend on a live in-memory operation. Database/repository/cluster passwords and known request secrets are redacted. Logs can still contain business data emitted by 1C; access follows the MCP endpoint's existing access policy. Existing log files from versions before this feature are not retroactively indexed.
+
 ## User sessions through RAC
 
 For a client/server infobase, add the following optional project settings with `upsert_project`:
