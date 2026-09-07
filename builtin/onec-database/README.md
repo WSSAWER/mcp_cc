@@ -10,6 +10,39 @@ Runtime project settings are stored outside this source folder:
 mcps\onec-database\.generated\projects.json
 ```
 
+## Execution owner and diagnostics
+
+Start `onec-database` in Control Center before using its CLI entry points. CLI
+extension/sync/status commands connect to that running MCP through a local named
+pipe; they never start an independent loader or keep a separate operation registry.
+If the owner is absent, the command fails without starting 1C. The pipe permits
+the owner's Windows account, local administrators and SYSTEM, not network users.
+Existing generated `sync.ps1` / `status.ps1` scripts use this same route.
+
+Project aliases with the same normalized IB connection share a lease and execution
+queue, independently of the executable, user or extension. Server/ref, file path,
+RAC identity and database connection fields are used in that order when available.
+Keep aliases consistent: unrelated DNS aliases or different connection descriptions
+cannot always be inferred to represent the same IB. Close the logical connection
+before changing its IB address or removing the project. This is still a logical
+lease, not a permanently open Designer process.
+
+Non-zero child exit codes are failures. Synchronous MCP calls return `isError`;
+background failures expose `exitCode`, `lastError` and `logPath`. Extension install
+holds one queue lock across LoadCfg/UpdateDBCfg and never executes the second step
+after a failed first step. Designer executions capture the platform's `/Out` log,
+including UTF-8, UTF-16 and Windows-1251 output, because stdout alone is insufficient.
+Use a Designer version compatible with the target server. Empty quoted command
+arguments are preserved; `file:` repository URLs are converted to Windows paths.
+
+Passwords and credential-bearing connection fields are encrypted with Windows
+DPAPI for the account running the MCP. Existing plaintext settings are migrated
+when the persistent owner starts. Moving to another computer or service account
+requires re-entering those protected values; ciphertext cannot serve as a portable
+password. Responses, operation arguments and new logs redact credentials. When
+updating settings, omit unchanged credential/connection fields instead of submitting
+`<redacted>` values. Historical logs are not rewritten automatically.
+
 The MCP supports:
 
 - a project-first workflow: call `list_projects`, select a binding, then call `get_project_actions` to see which Designer, repository, ibcmd, and RAC actions are actually configured;
