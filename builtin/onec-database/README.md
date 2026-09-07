@@ -10,6 +10,75 @@ Runtime project settings are stored outside this source folder:
 mcps\onec-database\.generated\projects.json
 ```
 
+## Validated database structure
+
+The owner loads the configuration into persistent C# database instances. JSON is
+storage, not a command template. Each instance owns its bindings, validated adapter
+access, connection lease, execution queue, operation/PID registry and sync-state
+lock. HTTP sessions and CLI callers use the same instance. Aliases of the same
+server/IB share it; conflicting SQL database or cluster/IB identifiers in aliases
+block execution instead of silently selecting one. Different bases have independent
+queues.
+
+Set normal connection data with `upsert_project`:
+
+- Designer/IB: `configuratorPaths`, `infobaseServer`, `infobaseName`,
+  `infobaseUser`, `infobasePassword`; a file base uses `infobaseFilePath` instead
+  of server/name. The server may include its port.
+- ibcmd/SQL database: `ibcmdPath`, `dataPath`, `dbms`, `databaseServer`,
+  `databaseName`, `databaseUser`, `databasePassword`. These describe the database
+  behind the IB, not its cluster alias. They are never inferred from an IB name.
+  File-mode ibcmd uses `infobaseFilePath` plus `dataPath`, with an empty `dbms`
+  and no SQL connection. Its command explicitly includes `--database-path`;
+  it never silently loads the unrelated default `data/db-data` database.
+  The mediator requires an explicit data directory to avoid accidentally sharing
+  the platform's default standalone-server directory between different bases.
+- Repository: `repositoryAddress`, `repositoryUser`, `repositoryPassword`.
+- Cluster administration: `racPath`, `rasHost`, `rasPort`, `clusterId`,
+  `clusterUser`, `clusterPassword`, `infobaseId`.
+
+The instance validates path resolution, file/directory kind, executable existence,
+address shape, required fields and adapter relationships. Relative paths resolve
+against the Control Center installation, not the process's current directory.
+An invalid adapter cannot construct a normal executable command. Missing
+executables are rechecked before launch. Use `get_project_actions` for readiness
+and validation errors; `check_project_status` explicitly refreshes filesystem
+validation as well as its network probes. `get_project_runtime` reports the live
+instance ID, binding errors, validation errors, lease and operations. Static
+validation is not proof of successful database authentication or a successful
+native import; those outcomes are verified from the actual operation and its log.
+
+Commands run against an immutable validated settings snapshot. Settings cannot be
+changed while the same database has active requests or queued/running operations.
+Changing an IB address or removing its binding additionally requires closing the
+lease. Updating an idle binding preserves the instance. Direct edits to
+`projects.json` are read on the next owner start; use `upsert_project` for live
+updates. Unknown or incomplete settings can be inspected and corrected without
+executing a database command.
+
+Old `DesignerConnectionArguments`, `InfobaseConnectionString` and
+`IbcmdConnectionArguments` are migration inputs only. They are parsed into fields,
+then removed from the stored JSON. Explicit fields take precedence when both are
+present. Recognized ibcmd aliases become canonical fields and commands emit
+`--database-name`. Unsupported legacy options are retained for correction, but
+are not silently forwarded to normal commands. Raw strings cannot override
+validated connection fields.
+
+For standard `run_ibcmd` / `build_ibcmd_arguments`, supply `operation` plus named
+`extension`, `sourcePath` (import), `outputPath` (export), and `force` (apply)
+where needed. The `arguments` array is accepted only for `operation=custom`.
+Normal repository actions likewise use named fields; arbitrary appended
+`arguments` require `operation=custom`. Custom is an explicitly unstructured
+diagnostic escape hatch, not the normal database workflow.
+
+Implementation layers are `OneCDatabaseModels` (persistence DTOs),
+`OneCDatabaseRuntime` (database lifetime/ownership), `OneCDatabaseValidation`
+(validated bindings and paths), `OneCDatabaseConnections` (connection entities
+and migration), `OneCDatabaseRequests` (typed operation input),
+`OneCDatabaseCommands` (argument builders), and `OneCDatabaseProcessCommand`
+(direct OS argument vectors). Git sync and CLI scripts invoke these C# workflows;
+scripts do not carry their own SQL/Designer connection command strings.
+
 ## Execution owner and diagnostics
 
 Start `onec-database` in Control Center before using its CLI entry points. CLI
@@ -91,7 +160,7 @@ Synchronization settings belong to a named 1C project. One project can contain a
 - `sourceRelativePath`: the configuration folder inside that repository, containing `Configuration.xml`;
 - `kind`: `configuration` or `extension`;
 - `extensionName`: the 1C extension name when `kind=extension`;
-- optional `scriptsDirectory`, for example `P:\Larta2\_1cTransition_main`.
+- optional `scriptsDirectory`, for generated operator entry points.
 
 Use `inspect_git_sync_source` first. It returns the repository root, current branch/HEAD and candidate folders containing `Configuration.xml`. Save the selected folder with `upsert_sync_target`. The MCP never runs `git pull`, switches branches or changes the working tree: repository updating remains an explicit external Git operation.
 
@@ -120,7 +189,7 @@ To recursively export one object from the information-base configuration, call `
 
 Use `list_operations` to read its active step, current/last PID, state, elapsed time, and log path. Use `cancel_operation` for a controlled process-tree termination.
 
-Repository project settings include designer connection arguments, repository address, repository user, and repository password. Passwords are never returned by `get_project`; only `repositoryPasswordConfigured` is returned.
+Repository commands use the validated IB/Designer binding and the repository address, user, and password. Passwords are never returned by `get_project`; only password-configured indicators are returned.
 
 ## Command logs and files
 
