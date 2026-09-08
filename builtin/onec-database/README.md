@@ -216,7 +216,7 @@ To recursively export one object from the information-base configuration, call `
 
 - uses hierarchical XML format;
 - first runs `/DumpConfigToFiles -configDumpInfoOnly` in a private `.generated` workspace;
-- selects the root and every child entry from `ConfigDumpInfo.xml` and writes a UTF-8 BOM `listFile`;
+- selects the root and its standalone child files from the direct `ConfigVersions/Metadata` entries and writes a UTF-8 BOM `listFile`; nested `Metadata` entries (attributes, tabular sections and their fields) are included in their parent XML, never requested as separate files;
 - runs `/DumpConfigToFiles -listFile` into the requested folder;
 - exposes both platform processes as one managed operation with a single operation id, lease, queue position, timeout, and final status;
 - defaults to background execution and a one-hour timeout;
