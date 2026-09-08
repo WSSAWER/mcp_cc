@@ -129,7 +129,7 @@ The MCP supports:
 - background execution for long operations: ready repository and load actions always return immediately with `operationId`; Advanced fallback commands support the explicit `background` option;
 - safe argument-array command construction without shell.
 
-For partial repository operations, prefer `objects`, an array of full root metadata names. Control Center creates the required 1C XML selection and marks every root with `includeChildObjects=true`. `objectsPath` is an advanced alternative and must point to an existing XML selection in the 1C `Objects` format. Examples of root names:
+For partial repository operations, prefer `objects`, an array of full root metadata names. Control Center creates the required 1C XML selection with child objects included. Exception: repository **lock** always selects `Configuration` / `Конфигурация` without descendants (`includeChildObjects=false`); ordinary named metadata remains recursive. Lock requires an explicit selection, not implicit capture of the whole repository. `objectsPath` is an advanced alternative in the 1C `Objects` XML format. For lock, it is copied to a private selection with the same Configuration guard; the original file is not modified. Retrieval/update selection behaviour is unchanged. Examples of root names:
 
 ```text
 Обработка.Потребности_ТОИР
@@ -147,10 +147,26 @@ The normal flow does not require constructing a Designer command line:
 2. If the object comes from the repository, call `repository_get_objects`, then `repository_lock_objects` with full root names. Use `repository_update_objects` for a normal repository update.
 3. Export from the information-base with `export_infobase_object_recursive` when a hierarchical working dump is needed.
 4. Edit the resulting XML/BSL files with a filesystem or Git tool. Editing source text is intentionally not hidden inside a database command.
-5. Call `infobase_load_objects` with the dump folder and root object names. The MCP selects the complete file set and updates the database configuration by default.
+5. Call `infobase_update_files` with `project`, `connectionType="designer"`, `files` and `allowExecution=true`. Pass paths to edited files or complete root XML files. Add new roots separately with `infobase_add_objects`.
 6. Call `repository_commit_objects` to commit the selected roots, or `repository_unlock_objects` to release them without a commit.
 
 `run_repository_command`, `build_repository_arguments`, `run_ibcmd`, and `build_ibcmd_arguments` are Advanced fallback tools for operations not represented by a ready action. They are not required for ordinary get/lock/load/commit work.
+
+### Designer: update files or add new root objects
+
+Both commands use the saved, validated database binding and its Designer executable. `files` are paths **on the MCP machine**, in hierarchical Designer XML layout, not client-machine paths or inline content. Upload/copy files first when using a remote MCP. A root XML selects that root and its companion directory recursively. A BSL/child file selects only that file for updates; its owning root XML must still be present alongside the hierarchical tree for identity validation. Adding a root always selects its complete supplied bundle.
+
+```json
+{"project":"MyProject","connectionType":"designer","files":["work/CommonModules/MyModule/Ext/Module.bsl"],"allowExecution":true}
+```
+
+`infobase_update_files` rejects the entire request if any root is missing in the current configuration or its UUID differs. `infobase_add_objects` accepts only new roots and rejects mixed new/existing roots and UUID collisions. The MCP exports the current `Configuration.xml` and metadata index, prepares a private package, and, for additions, edits only the root entries in its copied manifest. Caller-supplied `Configuration.xml` is not accepted. A second manifest export checks for concurrent external changes before loading. Caller files are not changed; changed inputs during preparation abort the operation.
+
+The generated file list and `-partial` load preserve external properties not supplied in the package. The MCP verifies the root set and configuration UUID after loading. By default it then updates the database configuration with dynamic update disabled, warnings treated as errors, and permission to terminate blocking sessions. **Designer database update applies all pending changes of the selected editable configuration, including changes that predate this package.** Optional `terminateSessions=false` prohibits forced termination; `updateDatabase=false` changes only the editable configuration. `extension` selects an extension; `configuratorIndex` selects a saved Designer path. Platform support/repository locks remain enforced: the MCP does not bypass support restrictions or acquire someone else's locks.
+
+The response is an operation, not a completion claim. By default there is no total-duration cutoff (`timeoutSeconds=0`); the owned loader PID/resource watchdog and explicit cancellation still apply. Set a positive timeout only when a total deadline is intended. Follow `list_operations`, `list_command_logs`/`search_log`, and `get_log_file`. Before/after manifests and the exact import package remain under `.generated/designer-files/<operationId>`. A successful load followed by a failed database update is **not a rollback**; inspect the native log before retrying. The older `infobase_load_objects` uses the same guarded update workflow and cannot add roots.
+
+Verification: run `.test/smoke-all.ps1` with `smoke-onec-database-designer-files.ps1` for isolated process-level tests. The opt-in `smoke-onec-database-designer-live.ps1` uses `MCP_DESIGNER_TEST_MODE=probe` for read-only connection/export, or `write` for a real test database. Set `MCP_DESIGNER_TEST_EXE`, `SERVER`, `DATABASE`, `USER`, `PASSWORD`, and `ROOT` in the test process environment (the shared prefix applies to each name). The write test adds a uniquely named harmless common module, updates it, reads it back, and verifies mixed-root rejection without forcibly terminating sessions. It retains the test object and artifacts for inspection; never point it at a production database.
 
 ## Git synchronization
 
@@ -173,6 +189,8 @@ Synchronization returns immediately by default and follows the actual loader PID
 `sync_auto(project, target, allowExecution=true, intervalSeconds=15, credentialId=...)` creates or enables one persistent background job in the database instance. Repeated calls do not create duplicates. The job captures the current branch and origin, fetches that branch, and fast-forwards only a clean checkout. It never resets/stashes local work, switches branches or merges divergent histories. A fixed commit snapshot under `.generated/sync-snapshots` is used for import, so later checkout edits cannot change files in the active load. The snapshot is removed after the cycle.
 
 One cycle runs at a time; repositories shared by multiple jobs are serialized. An existing manual database lease or active operation makes the job wait. Each completed cycle releases only its own idle automatic lease. A new check is scheduled after the cycle, not while a load is still running. Git/SSH and import errors pause the job until another explicit `sync_auto` call. Jobs resume when the MCP owner restarts, except a restart during an import pauses for inspection. `stop_sync_auto` persists the disabled state and lets an already started load finish; `cancel_operation` is the separate explicit abort command.
+
+Within an automatic cycle, **after import and before apply**, origin is fetched again (`checking_updates` in `sync-info`). If a newer commit exists, its fixed snapshot is imported under the **same operation and database lease**, then Git is checked again. Catch-up compares against the last imported snapshot, including reverted files; deletes/manifest changes require a full import. Apply/check run only once the latest fetch matches the imported commit. Intermediate attempts are `superseded`, never successful. Git/validation failure at this boundary blocks apply and pauses the job. Restart during this boundary also requires inspection. This is polling, not an atomic lock on the remote branch: a push after the final fetch belongs to the next cycle. One-shot `sync_git_target` keeps its no-fetch behaviour.
 
 `sync-info(project, target)` reads the job and current/latest operation **without contacting Git**. It returns enabled state, phase (`fetching`, `importing`, `idle`, `waiting_database`, `waiting_repository`, `stopped`, `paused_error`), branch, loading commit, last successful commit/time, PID, precise process step, resource samples, error, operation ID and log ID/resource URI. Use `get_log_file(logId)` to download the actual log. Job settings/status are persisted alongside target history in `auto.json`; they are independent of MCP client sessions.
 
