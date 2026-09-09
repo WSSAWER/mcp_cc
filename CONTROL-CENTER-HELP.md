@@ -22,6 +22,7 @@ For MCP clients, the preferred connection is the **Services -> Copy unified URL*
 - **Copy Gate URL** copies the configured gate MCP URL.
 - **Edit** opens MCP settings. For not-installed MCPs, only install/config/command settings are editable.
 - **Install** downloads or restores a missing MCP from its configured npm/Git/built-in source. It does not start the MCP.
+- Git installs use a shallow, single-branch clone (`--depth 1`): only the selected branch/tag's latest snapshot is downloaded. An empty branch selects the repository's default branch. This applies to all Git-backed MCPs, including local Git sources; npm and built-in installs are unchanged. Existing full clones are not modified automatically: **Update / Reinstall -> Program** replaces them with a shallow clone while retaining `.generated`. If a custom build explicitly needs older Git history, its post-install command can fetch that history.
 - **Update / Reinstall -> Program** removes program files and temporary install files, keeps generated files, then installs again.
 - **Update / Reinstall -> All** removes the whole MCP folder, including generated files, then installs again.
 - **Remove -> Program / Generated / All** removes the selected file scope without deleting the shared MCP definition.
