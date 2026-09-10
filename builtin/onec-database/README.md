@@ -229,13 +229,25 @@ To recursively export one object from the information-base configuration, call `
 - selects the root and its standalone child files from the direct `ConfigVersions/Metadata` entries and writes a UTF-8 BOM `listFile`; nested `Metadata` entries (attributes, tabular sections and their fields) are included in their parent XML, never requested as separate files;
 - runs `/DumpConfigToFiles -listFile` into the requested folder;
 - exposes both platform processes as one managed operation with a single operation id, lease, queue position, timeout, and final status;
-- defaults to background execution and a one-hour timeout;
+- defaults to background execution without an execution deadline (`timeoutSeconds=0`);
 - participates in the same persistent Designer lease and per-project queue as repository operations;
 - never clears the output folder and does not silently enable incremental `-update` mode.
 
 Use `list_operations` to read its active step, current/last PID, state, elapsed time, and log path. Use `cancel_operation` for a controlled process-tree termination.
 
 Repository commands use the validated IB/Designer binding and the repository address, user, and password. Passwords are never returned by `get_project`; only password-configured indicators are returned.
+
+## Long-running operations
+
+Execution and observation are separate. All managed 1C command timeouts default to `0` (no total-duration cutoff), including repository commands, recursive exports, ibcmd and extension installation. Two hours or more can be normal for a large configuration. A positive `timeoutSeconds` is an explicit **hard deadline that kills the owned process tree**, not a client wait interval. Do not pass `600` or `1200` just to wait.
+
+Use background execution for long commands and retain the returned `operationId` and `logId`. Ready repository/file/sync commands already return an operation; `run_extension_install` also defaults to `background=true`. Advanced commands such as `run_ibcmd`/`run_repository_command` should be called with `background=true` to keep the MCP connection available for status requests. CLI extension installation retains synchronous execution, without an implicit deadline.
+
+After **600 seconds**, request `list_operations` and inspect the matching operation's `status`, `currentStep`, PID, activity and `lastError`; use `search_log` or `get_log_file` for details. Continue checking while the state is `starting`, `queued` or `running`. For automatic synchronization, `sync-info` exposes the current operation as well. Snapshots include `statusCheckAfterSeconds=600`, `statusCheckDue` and `nextAction`. This threshold does not cancel the operation, change its status or imply a hang. Terminal elapsed time stays fixed.
+
+A client/transport timeout or an incomplete log is not a result: locate the original operation before retrying. Do not cancel or launch a duplicate based solely on elapsed time. Explicit cancellation and actual process failures remain distinct from total duration.
+
+Automatic inactivity interruption applies to **all managed command processes**, including Designer/repository/export, ibcmd and RAC, not only imports. Every 60 seconds it samples the entire owned process tree. After 180 seconds without CPU or read/write/other I/O progress it stops that tree automatically and reports `hung` with an error in the command log. **Any one increasing counter resets the entire idle period** (CPU, read, write or other I/O; operations or bytes). These Windows I/O counters include file, network and device activity; they are not separate disk/network byte meters. Unknown/unreadable counters and counter resets never count as zero activity. Each check writes exactly one `ACTIVITY` log line with all counters, `observation`, `activeCounters`, `resetIdleTimer` and `idleSeconds`; interruption adds a separate `HUNG` error. The operation snapshot identifies the I/O scope and watchdog thresholds. This remains an inactivity heuristic, not proof that work on a remote server is stuck; inspect the database after interruption.
 
 ## Command logs and files
 
