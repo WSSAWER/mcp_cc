@@ -154,7 +154,11 @@ The normal flow does not require constructing a Designer command line:
 
 ### Designer: update files or add new root objects
 
-Both commands use the saved, validated database binding and its Designer executable. `files` are paths **on the MCP machine**, in hierarchical Designer XML layout, not client-machine paths or inline content. Upload/copy files first when using a remote MCP. A root XML selects that root and its companion directory recursively. A BSL/child file selects only that file for updates; its owning root XML must still be present alongside the hierarchical tree for identity validation. Adding a root always selects its complete supplied bundle.
+Both commands use the saved, validated database binding and its Designer executable. `files` are paths **on the MCP machine**, not client-machine paths or inline content. Upload/copy files first when using a remote MCP. Both adding and updating accept the usual Designer hierarchy **or a flat staging directory**. The common normalizer reads the owning root's type, name and UUID from XML, even if the XML file has been renamed, and builds the canonical load hierarchy inside the private workspace. This applies to every supported root metadata type, not just roles.
+
+For example, a staging directory with a Role XML named `incoming.xml` and `Rights.xml` becomes `Roles/<XML-name>.xml` and `Roles/<XML-name>/Ext/Rights.xml`. Supply the entire staging directory or explicitly list the root XML and loose properties. Selecting only the root XML also includes its named companion directory and a sibling `Ext` directory; unrelated loose siblings are not silently selected. With several roots, use a separate staging directory per root or companion folders named after each root. Shared loose properties, conflicting destination paths and child metadata XML without an identifiable relative child directory are rejected **before any Designer/repository command**.
+
+Named companion folders and object-relative `Forms`, `Templates`, nested `Subsystems`, `Ext`, etc. retain their hierarchy and ownership. A BSL/child file selects only that file for updates; the owning root XML must be available beside the named object folder (or explicitly included). Adding a root selects its complete supplied bundle. Normalization never renames, moves or deletes caller files; `INPUT FILE` log entries record each original path, normalized path and hash.
 
 ```json
 {"project":"MyProject","connectionType":"designer","files":["work/CommonModules/MyModule/Ext/Module.bsl"],"allowExecution":true}
