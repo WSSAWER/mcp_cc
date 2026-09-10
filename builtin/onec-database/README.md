@@ -12,6 +12,40 @@ mcps\onec-database\.generated\projects.json
 
 ## Validated database structure
 
+### Configuration and extension components
+
+Each physical database owns one `configuration` component and its discovered
+`extension:<exact name>` components. Call `list_components(project)` first.
+The read-only inventory is cached; `refresh=true` reloads it. A reference to an
+unknown extension refreshes once and then either resolves it or fails explicitly.
+Successful native operations trigger first discovery; extension installation and
+ibcmd commands request another discovery. Changed connection settings invalidate
+the previous verification. Failed discovery preserves the last inventory and
+reports an error; missing extensions keep their settings/history but cannot sync.
+
+`configure_component(project, component, git?, repository?, allowExecution=true)`
+stores the selected component's sources. Omitted sections remain unchanged;
+`clearGit=true` / `clearRepository=true` explicitly clear a source and stop its
+future jobs. Validation uses real Git access or a read-only Designer repository
+report. Failed candidates are saved as drafts, without replacing effective
+settings. Component repository passwords are protected with Windows DPAPI.
+
+For repository sources, supply `address`, `user`, `password`, and optional
+`configuratorIndex`. Configuration and extensions do not implicitly share
+repository credentials. The probe verifies that a nonempty report can be read;
+it does **not** prove the existing IB binding or attach the IB to a repository.
+That binding must already match. Native integration against a real bound
+repository still requires acceptance testing; simulated process tests do not
+prove platform behavior for captured objects.
+
+`sync_now(project, component, type="repository", allowExecution=true)` schedules
+recursive repository retrieval followed by database update. Retrieval uses
+`/ConfigurationRepositoryUpdateCfg -force` **without `-revised`**: it does not
+request replacement of captured objects. No capture, commit, unlock or automatic
+binding is performed. UpdateDBCfg applies **all pending local changes** of the
+selected component. User sessions are not forcibly terminated. If retrieval
+fails or is cancelled, database update does not start; no rollback is implied.
+
 The owner loads the configuration into persistent C# database instances. JSON is
 storage, not a command template. Each instance owns its bindings, validated adapter
 access, connection lease, execution queue, operation/PID registry and sync-state
@@ -178,49 +212,120 @@ The response is an operation, not a completion claim. By default there is no tot
 
 Verification: run `.test/smoke-all.ps1` with `smoke-onec-database-designer-files.ps1` for isolated process-level tests. The opt-in `smoke-onec-database-designer-live.ps1` uses `MCP_DESIGNER_TEST_MODE=probe` for read-only connection/export, or `write` for a real test database. Set `MCP_DESIGNER_TEST_EXE`, `SERVER`, `DATABASE`, `USER`, `PASSWORD`, and `ROOT` in the test process environment (the shared prefix applies to each name). The write test adds a uniquely named harmless common module, updates it, reads it back, and verifies mixed-root rejection without forcibly terminating sessions. It retains the test object and artifacts for inspection; never point it at a production database.
 
-## Git synchronization
+## Component synchronization
 
-Synchronization settings belong to a named 1C project. One project can contain a main `configuration` target and any number of named `extension` targets. Each target stores:
+Configure a Git source once with `configure_component`:
 
-- `gitRepositoryPath`: an existing local Git working tree;
-- `sourceRelativePath`: the configuration folder inside that repository, containing `Configuration.xml`;
-- `kind`: `configuration` or `extension`;
-- `extensionName`: the 1C extension name when `kind=extension`;
-- optional `scriptsDirectory`, for generated operator entry points.
+- `repositoryUrl`: exact remote URL, without embedded credentials;
+- `branch`: explicit branch to follow;
+- `checkoutPath`: local checkout on the MCP host;
+- `sourceRelativePath`: folder inside the checkout containing `Configuration.xml`;
+- `gitSshCredentialId`: optional prepared SSH identity.
 
-Use `inspect_git_sync_source` first. It returns the repository root, current branch/HEAD and candidate folders containing `Configuration.xml`. Save the selected folder with `upsert_sync_target`. The one-shot `sync_git_target` never updates Git. Use the explicitly enabled `sync_auto` job for fetching and fast-forwarding the current branch from `origin`.
+The service checks the exact branch through noninteractive `git ls-remote`,
+clones a missing/empty checkout, and verifies its root, origin, branch, clean
+state and metadata. An extension source must name the selected extension.
+Existing remotes, ownership, branches and local changes are not rewritten to
+make validation pass. Paths escaping the checkout or traversing directory links
+are rejected. Source checks have a 120-second network/probe deadline, separate
+from database loading. A failed candidate does not enable synchronization.
 
-`sync_git_target` loads the exact committed HEAD represented by the selected folder. The first run performs a full XML import. Later runs calculate committed changes from the last successfully loaded commit and use `ibcmd config import files` with the absolute file list supplied through stdin, then run `config apply` and `config check`. A `Configuration.xml` change, deleted metadata or rewritten Git history switches the plan to a reviewed full load; rewritten history requires `forceFull=true`. A dirty selected source is rejected because it cannot be attributed to a commit hash.
+### Start, observe and stop
 
-Synchronization returns immediately by default and follows the actual loader PID without a total-duration cutoff. Resource samples are collected every **60 seconds** for the owned process tree. **180 seconds without any increase in CPU time or read/write/other I/O counters** is treated as a suspected hang: only that loader tree is forcibly stopped, the operation becomes `hung`, and automatic sync pauses with an error. Unavailable counters are reported as monitoring errors, not as inactivity. Output silence or zero rounded CPU percentage alone does not trigger the watchdog. This is a heuristic: a client may legitimately wait for a busy remote database, and killing it does not prove server-side work has stopped. Inspect the log/database before resuming.
+`sync_now(project, component, type, allowExecution=true)` schedules one cycle.
+`sync_auto(project, component, type, intervalSeconds, allowExecution=true)`
+creates/enables a persistent job. `type` is `git` or `repository`; component is
+explicitly `configuration`, `extension:<name>`, or an ID from `list_components`.
+For automatic jobs, an integer interval of 5..86400 seconds is required.
+Paths, branch and credentials are not repeated in these calls.
 
-### Automatic jobs and status
+Both return a `jobId`; scheduling is **not** completed loading.
+`sync_info(project, jobId?)` reads all jobs or one job without contacting Git or
+1C. It reports phase, next check, real native `operationId`/PID when available,
+last successful version/time, error, and log URI. During validation/fetch there
+may be no native operation yet. Use `get_log_file` / `search_log` for command
+logs. After 600 seconds inspect status; elapsed time alone is not failure.
 
-`sync_auto(project, target, allowExecution=true, intervalSeconds=15, credentialId=...)` creates or enables one persistent background job in the database instance. Repeated calls do not create duplicates. The job captures the current branch and origin, fetches that branch, and fast-forwards only a clean checkout. It never resets/stashes local work, switches branches or merges divergent histories. A fixed commit snapshot under `.generated/sync-snapshots` is used for import, so later checkout edits cannot change files in the active load. The snapshot is removed after the cycle.
+`stop_sync(project, jobId, allowExecution=true)` disables future cycles and
+allows the current load to finish. Explicit `cancel_operation(operationId)` is
+a different action. Jobs are independent of chat/MCP sessions. Idle enabled jobs
+resume after service restart and revalidate their settings; interrupted loading
+or errors pause only the affected job until explicit resumption.
 
-One automatic cycle per database runs at a time; repositories shared by multiple jobs are serialized. Automatic imports use a separate cycle-owned `ibcmd` lease: an idle retained Designer lease does **not** block them and is never replaced or closed by the cycle. This includes Designer leases opened implicitly by repository commands. A retained `ibcmd` lease (the same loader route), other retained connection types, or an active database operation makes the job wait. Commands arriving during a load still use the shared database queue, so Designer and ibcmd commands do not execute concurrently. A cycle releases only its own connection on success or failure; it does not require closing a caller's idle Designer workflow. A new check is scheduled after the cycle, not while a load is still running. Git/SSH and import errors pause the job until another explicit `sync_auto` call. Jobs resume when the MCP owner restarts, except a restart during an import pauses for inspection. `stop_sync_auto` persists the disabled state and lets an already started load finish; `cancel_operation` is the separate explicit abort command.
+One physical DB has one write queue, even if multiple project names refer to it.
+Its components have independent schedules, but their native writes are
+serialized. Different DBs can load concurrently. Two enabled source types for
+one component are rejected with `source_conflict`. An idle retained Designer
+lease does not block a Git/ibcmd cycle; the cycle does not close that lease.
+The same retained route or actual running operations cause waiting.
+The next check is scheduled after cycle completion, not during a running load.
 
-Within an automatic cycle, **after import and before apply**, origin is fetched again (`checking_updates` in `sync-info`). If a newer commit exists, its fixed snapshot is imported under the **same operation and database lease**, then Git is checked again. Catch-up compares against the last imported snapshot, including reverted files; deletes/manifest changes require a full import. Apply/check run only once the latest fetch matches the imported commit. Intermediate attempts are `superseded`, never successful. Git/validation failure at this boundary blocks apply and pauses the job. Restart during this boundary also requires inspection. This is polling, not an atomic lock on the remote branch: a push after the final fetch belongs to the next cycle. One-shot `sync_git_target` keeps its no-fetch behaviour.
+### Git load sequence and history
 
-`sync-info(project, target)` reads the job and current/latest operation **without contacting Git**. It returns enabled state, phase (`fetching`, `importing`, `idle`, `waiting_database`, `waiting_repository`, `stopped`, `paused_error`), branch, loading commit, last successful commit/time, PID, precise process step, resource samples, error, operation ID and log ID/resource URI. `executionConnection` shows the database's current automatic-cycle connection separately from the caller's retained connection returned by `get_project_connection`; it is null between cycles. Use `get_log_file(logId)` to download the actual log. Job settings/status are persisted alongside target history in `auto.json`; they are independent of MCP client sessions.
+Every Git cycle, including `sync_now`, fetches the configured branch and
+fast-forwards a clean checkout. It never resets/stashes work or merges divergent
+history. A matching last-successful hash causes no database import. A new hash
+is imported from an immutable snapshot under `.generated/sync-snapshots`.
+The first import is full; later imports use changed files where safe.
+Manifest/deletion changes require a full import; divergent history is rejected
+for review rather than silently overwriting the database.
 
-### SSH preparation and private key storage
+After import, Git is checked again **before apply/check**. New commits are
+imported under the same operation and lease until the latest fetch matches the
+imported snapshot; only then are apply/check run. Intermediate hashes are
+`superseded`, never successful. This is polling: a push after the final fetch
+belongs to the next cycle. The successful hash advances only after all native
+steps succeed. Operation-owned snapshots are cleaned up after the cycle.
 
-1. Call `prepare_sync_git(sshUrl, folder, allowExecution=true)` on the server running this MCP. It creates an Ed25519 deploy identity and returns `credentialId`, the **public** key and its fingerprint. Add that public key to the repository as a **read-only deploy key**. No repository ACL or ownership is silently changed.
-2. Obtain and independently verify the Git server's host key. Provide a local verified `known_hosts` file to `connect_sync_git(credentialId, knownHostsPath, allowExecution=true)`. This copies the verified public host keys into the credential store, checks SSH access, and clones into a missing/empty folder. For an existing repository it only verifies the root and access; it does not replace its origin or files.
-3. Configure the sync target and pass this `credentialId` to `sync_auto`. Its own fetch uses the prepared SSH URL, without changing the repository's stored origin. SSH uses the specified identity only, batch mode and strict host-key checking. Unknown/changed host keys are errors, not auto-accepted.
+`get_component_sync_history(project, component)` returns the successful hash,
+failures/logs since that success, and pending local checkout commits/files.
+It does not fetch. Aliases share the original history location. Settings/jobs
+are stored atomically under `.generated/components/<database identity hash>`;
+journals remain under `.generated/sync/<original project>/<history target>`.
+Legacy target/auto settings are migrated without deleting their JSON/history.
+Conflicting sources are reported and paused; disabled jobs stay disabled.
+Old target-based MCP tools and `repository_sync_auto` are replaced, not run
+beside the new scheduler.
 
-Private keys remain under `%ProgramData%/McpControlCenter/Secrets/Git/<credentialId>/id_ed25519`, accessible to the creating service account, SYSTEM and administrators. They are **not** stored in Git, the application folder, `.generated`, logs or the portable JSON. Do not paste private key contents into tools/chat. A new machine/service account requires a newly prepared identity. Keys are currently generated without a passphrase for unattended use; file protection and read-only repository permissions are essential, and revocation is performed at the Git host. Git host registration is an administrator step, not an automatic privilege escalation by this MCP. `ssh.exe` and `ssh-keygen.exe` must be available to the service account.
-
-Without `credentialId`, Git uses the existing credential helper of the **MCP service account**, with interactive prompts disabled. A user's desktop TortoiseGit/Pageant login does not establish service access. A Git/SSH network command has a separate 120-second timeout; it is not the database import deadline.
-
-The successful hash is advanced only after import, apply and check all succeed. `get_sync_status` returns the current and last-successful hashes, pending changes and every failed attempt after the last success, including its attempted hash, error and log path. `get_sync_changes` returns the pending commit list and changed files without changing Git or 1C. The journal is stored under:
+The CLI uses the same owner process and contract:
 
 ```text
-mcps\onec-database\.generated\sync\<project>\<target>\history.json
+McpControlCenter.exe --onec-db-sync --root "<installation>" --project "<project>" --component "extension:<name>" --type git --allow-execution
+McpControlCenter.exe --onec-db-sync-status --root "<installation>" --project "<project>" --job-id "<returned ID>"
 ```
 
-If `scriptsDirectory` is configured, every synchronization refreshes UTF-8-with-BOM `sync.ps1` and `status.ps1` entry points there; `install_sync_scripts` can refresh them explicitly without loading 1C. They invoke the same Control Center workflow and contain only the executable/root/project/target references—database and repository passwords are not copied into scripts.
+The first call schedules, it does not block until import completion.
+Old scripts passing `--target` must be regenerated or adjusted to this contract.
+
+### Git SSH identity
+
+1. `prepare_git_ssh(sshUrl, folder, allowExecution=true)` creates an Ed25519
+   identity and returns `gitSshCredentialId`, its **public** key and fingerprint.
+   Add the public key as a read-only deploy key at the Git host.
+2. Independently verify the Git host key, then pass a verified local
+   `knownHostsPath` to `connect_git_ssh(gitSshCredentialId, knownHostsPath,
+   allowExecution=true)`. This verifies access and prepares a missing checkout.
+3. Save this ID in the component's Git source. A selected identity is exclusive:
+   strict host-key checking, batch mode and no fallback to another identity.
+   Unknown/changed host keys fail.
+
+Private keys remain in
+`%ProgramData%/McpControlCenter/Secrets/Git/<gitSshCredentialId>/id_ed25519`,
+accessible to the creating service account, SYSTEM and administrators.
+They are not included in portable JSON, application files, replies or logs.
+Keys are unencrypted files for unattended SSH; ACLs and read-only repository
+permissions are essential. A new host/account needs its own identity.
+Without an ID, noninteractive Git uses the MCP service account's configured
+agent/helper. A desktop user's Pageant session does not establish service access.
+
+### Process supervision
+
+The loader has no default total-duration deadline. Every 60 seconds the owned
+process tree is sampled; 180 seconds without CPU or read/write/other I/O progress
+causes a suspected-hang stop and a logged `hung` result. Any increasing counter
+resets the whole idle period; unavailable counters are not treated as zero.
+This remains a heuristic: a client can wait for remote DB work. Inspect the
+database/log before resuming after an interruption.
 
 To recursively export one object from the information-base configuration, call `export_infobase_object_recursive` with `project`, `objectName`, `outputPath`, and `allowExecution=true`. For example, `objectName=Обработка.Потребности_ТОИР` produces that root object and all its child metadata under `outputPath`. The operation:
 
@@ -243,7 +348,7 @@ Execution and observation are separate. All managed 1C command timeouts default 
 
 Use background execution for long commands and retain the returned `operationId` and `logId`. Ready repository/file/sync commands already return an operation; `run_extension_install` also defaults to `background=true`. Advanced commands such as `run_ibcmd`/`run_repository_command` should be called with `background=true` to keep the MCP connection available for status requests. CLI extension installation retains synchronous execution, without an implicit deadline.
 
-After **600 seconds**, request `list_operations` and inspect the matching operation's `status`, `currentStep`, PID, activity and `lastError`; use `search_log` or `get_log_file` for details. Continue checking while the state is `starting`, `queued` or `running`. For automatic synchronization, `sync-info` exposes the current operation as well. Snapshots include `statusCheckAfterSeconds=600`, `statusCheckDue` and `nextAction`. This threshold does not cancel the operation, change its status or imply a hang. Terminal elapsed time stays fixed.
+After **600 seconds**, request `list_operations` and inspect the matching operation's `status`, `currentStep`, PID, activity and `lastError`; use `search_log` or `get_log_file` for details. Continue checking while the state is `starting`, `queued` or `running`. For automatic synchronization, `sync_info` exposes the current operation as well. Snapshots include `statusCheckAfterSeconds=600`, `statusCheckDue` and `nextAction`. This threshold does not cancel the operation, change its status or imply a hang. Terminal elapsed time stays fixed.
 
 A client/transport timeout or an incomplete log is not a result: locate the original operation before retrying. Do not cancel or launch a duplicate based solely on elapsed time. Explicit cancellation and actual process failures remain distinct from total duration.
 
