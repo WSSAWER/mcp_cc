@@ -19,6 +19,12 @@ Use **Services -> Copy unified URL**. By default it is `http://<Gate bind IP>:11
 
 During `initialize`, the unified endpoint returns MCP `instructions`. They explain that tools are exposed as `<mcp-id>.<tool-name>` and that the client should call `tools/list` again after MCPs are started, stopped, enabled, disabled, installed, reinstalled, or updated. This is required because the unified endpoint is dynamic and aggregates only currently running enabled MCPs.
 
+Unified declares `capabilities.tools.listChanged: true`. The MCP client should keep a **GET on the same `/mcp` URL** open, with `Accept: text/event-stream` and the `Mcp-Session-Id` from initialization. On `notifications/tools/list_changed`, it must repeat the protocol request `tools/list` and update the tools supplied to its model. `initialize` and `tools/list` are protocol methods, not tools for the model to call. A text instruction alone cannot refresh a client's tool registry.
+
+Control Center checks the shared live catalog every 3 seconds while clients are subscribed, including metadata changes inside an already-running MCP. Discovery is parallel with a 5-second deadline per upstream; it does not run business tools or block long tool calls. A stopped or unresponsive upstream is omitted until discovery recovers. Each notification contains only the change signal, never tool data or credentials. Admin tools remain available only to authorized sessions. The stream sends keepalive comments every 15 seconds and closes on session deletion or Control Center shutdown. Reconnecting a stream re-checks changes since the client's last `tools/list`; SSE event replay IDs are not implemented.
+
+Clients that do not support these notifications must refresh/reconnect their **MCP connection** to obtain new tools. Restarting the underlying MCP service is not necessary. Individual Gate URLs remain independent diagnostic/compatibility connections; this notification mechanism belongs to Unified.
+
 Each MCP also keeps two diagnostic/compatibility endpoints:
 
 - **Internal URL**: direct local upstream URL, useful for local diagnostics.
