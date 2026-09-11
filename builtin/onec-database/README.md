@@ -216,11 +216,21 @@ Verification: run `.test/smoke-all.ps1` with `smoke-onec-database-designer-files
 
 Configure a Git source once with `configure_component`:
 
-- `repositoryUrl`: exact remote URL, without embedded credentials;
+- `repositoryUrl`: network endpoint to fetch, without embedded credentials;
 - `branch`: explicit branch to follow;
 - `checkoutPath`: local checkout on the MCP host;
 - `sourceRelativePath`: folder inside the checkout containing `Configuration.xml`;
 - `gitSshCredentialId`: optional prepared SSH identity.
+
+The checkout's `origin` may use HTTPS while the selected SSH identity uses
+`git@host:owner/repo.git` (or `ssh://git@host/owner/repo.git`). Conventional
+hosted URLs with the same host and case-sensitive repository path are equivalent;
+optional `.git` and default ports are normalized. Other hosts, paths, SSH users,
+nondefault ports and ambiguous/escaped paths are not silently equated. Local
+sources still require an exact match. See the [Git URL formats](https://git-scm.com/docs/git-fetch#_git_urls).
+Validation never rewrites `origin`. Fetch always uses the configured endpoint,
+and a selected SSH key must still match its exact prepared URL and checkout.
+The origin identity is checked both before and after fetch.
 
 The service checks the exact branch through noninteractive `git ls-remote`,
 clones a missing/empty checkout, and verifies its root, origin, branch, clean
