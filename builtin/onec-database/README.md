@@ -275,7 +275,28 @@ The next check is scheduled after cycle completion, not during a running load.
 Every Git cycle, including `sync_now`, fetches the configured branch and
 fast-forwards a clean checkout. It never resets/stashes work or merges divergent
 history. A matching last-successful hash causes no database import. A new hash
-is imported from an immutable snapshot under `.generated/sync-snapshots`.
+is imported from an immutable snapshot under
+`.generated/sync-work/<project scope>/<direction scope>/sync-snapshots/<invocation>`.
+Git loaders, repository synchronization and component probes also receive separate
+working directories under their project/direction's `commands/<invocation>`.
+Names include a readable prefix and stable hash to prevent sanitized-name collisions.
+Only the current invocation's temporary files are removed after completion/failure;
+other projects, configured Git checkouts, base data directories and persistent
+sync journals are not moved or deleted. `SYNC WORKSPACE` in the command log records
+the actual working directory.
+
+Each native ibcmd launch in Git synchronization (import/apply/check/reset) and
+component discovery receives a fresh server-data directory:
+`<configured dataPath>/runs/run-<short project name>-<GUID>`.
+Its validated C# connection uses this directory as `--data`, without copying old
+`session-data`. SQL server/database/authentication and the explicit absolute
+`--database-path` of a file IB stay unchanged; `ibcmd.exe` is not copied.
+`IBCMD DATA` records the exact path in the command log. After native process exit,
+only this invocation's data is removed. Cleanup first tries normal deletion, then
+clears ReadOnly attributes in the owned subtree and retries, without following links.
+A cleanup failure is logged with the retained path; a later launch never reuses it.
+This prevents reuse of stale session-data, but cannot guarantee that every native
+filesystem error is eliminated. Existing paused jobs are not resumed automatically.
 The first import is full; later imports use changed files where safe.
 Manifest/deletion changes require a full import; divergent history is rejected
 for review rather than silently overwriting the database.
