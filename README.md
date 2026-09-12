@@ -52,10 +52,11 @@ Options:
 | Import | `warningsAsErrors` | `true` | Treat UpdateDBCfg warnings as errors. |
 | Both | `configuratorIndex`, `leaseId` | saved/default | Select the configured Designer executable or reuse a connection lease. |
 
-Full binary import is blocked when the selected target has repository settings;
-use repository-aware object commands instead. No unbind, capture, unlock or
-commit is performed implicitly. A binding only present in 1C, but missing from
-MCP settings, is still subject to native platform restrictions. A failure after
+Repository settings alone do not block binary import. Active operations on the
+same database serialize execution: the next import waits in `queued` state and
+starts after the current operation releases the database gate. No unbind,
+capture, unlock or commit is performed implicitly; native 1C restrictions and
+explicit connection leases still apply. A failure after
 successful LoadCfg **does not roll back** that load: inspect the two result flags
 before retrying. Export publishes only a verified nonempty file; private import
 copies and incomplete export files are cleaned, while caller files and logs stay.
