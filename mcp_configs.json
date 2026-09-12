@@ -456,65 +456,69 @@
                      ]
     },
     {
-        "id":  "onec-database",
-        "name":  "1C Database Manager",
-        "enabled":  false,
-        "command":  "",
-        "entry":  "{APP_DIR}\\McpControlCenter.exe",
-        "rawCommandArguments":  [
-                                    "--onec-db-mcp",
-                                    "--stdio-line-json",
-                                    "--onec-db-root",
-                                    "{APP_DIR}"
-                                ],
-        "workingDirectory":  "{APP_DIR}\\mcps\\onec-database\\server",
-        "internalPort":  11610,
-        "externalPort":  11510,
-        "mcpPath":  "/mcp",
-        "healthPath":  "/healthz",
-        "errorLog":  "{APP_DIR}\\mcps\\onec-database\\mcp.err.log",
-        "installMethod":  "builtin",
-        "npmPackage":  "",
-        "gitRepository":  "",
-        "builtinTemplate":  "onec-database",
-        "commands":  [
-                         {
-                             "title":  "Check 1C Database MCP",
-                             "command":  "{APP_DIR}\\McpControlCenter.exe",
-                             "arguments":  "--onec-db-mcp-self-test",
-                             "log":  true,
-                             "background":  false,
-                             "confirmation":  false,
-                             "allowedWhileRunning":  true
-                         },
-                         {
-                             "title":  "Wait smoke 30s",
-                             "command":  "{APP_DIR}\\McpControlCenter.exe",
-                             "arguments":  "--onec-db-wait-smoke-test --durations 30",
-                             "log":  true,
-                             "background":  false,
-                             "confirmation":  false,
-                             "allowedWhileRunning":  true
-                         },
-                         {
-                             "title":  "Wait smoke 2m",
-                             "command":  "{APP_DIR}\\McpControlCenter.exe",
-                             "arguments":  "--onec-db-wait-smoke-test --durations 120",
-                             "log":  true,
-                             "background":  false,
-                             "confirmation":  false,
-                             "allowedWhileRunning":  true
-                         },
-                         {
-                             "title":  "Wait smoke 5m",
-                             "command":  "{APP_DIR}\\McpControlCenter.exe",
-                             "arguments":  "--onec-db-wait-smoke-test --durations 300",
-                             "log":  true,
-                             "background":  false,
-                             "confirmation":  false,
-                             "allowedWhileRunning":  true
-                         }
-                     ]
+        "id": "onec-database",
+        "name": "1C Database Manager",
+        "enabled": false,
+        "command": "",
+        "entry": "{APP_DIR}\\mcps\\onec-database\\server\\OneCDatabase.exe",
+        "rawCommandArguments": [
+            "--onec-db-http",
+            "--port",
+            "{INTERNAL_PORT}",
+            "--onec-db-root",
+            "{APP_DIR}"
+        ],
+        "workingDirectory": "{APP_DIR}\\mcps\\onec-database\\server",
+        "internalPort": 11610,
+        "externalPort": 11510,
+        "mcpPath": "/mcp",
+        "healthPath": "/healthz",
+        "errorLog": "{APP_DIR}\\mcps\\onec-database\\mcp.err.log",
+        "installMethod": "git",
+        "npmPackage": "",
+        "gitRepository": "https://github.com/WSSAWER/onec_database.git",
+        "builtinTemplate": "",
+        "commands": [
+            {
+                "title": "Check 1C Database MCP",
+                "command": "{APP_DIR}\\mcps\\onec-database\\server\\OneCDatabase.exe",
+                "arguments": "--onec-db-mcp-self-test --onec-db-root \"{APP_DIR}\"",
+                "log": true,
+                "background": false,
+                "confirmation": false,
+                "allowedWhileRunning": true
+            },
+            {
+                "title": "Wait smoke 30s",
+                "command": "{APP_DIR}\\mcps\\onec-database\\server\\OneCDatabase.exe",
+                "arguments": "--onec-db-wait-smoke-test --durations 30 --onec-db-root \"{APP_DIR}\"",
+                "log": true,
+                "background": false,
+                "confirmation": false,
+                "allowedWhileRunning": true
+            },
+            {
+                "title": "Wait smoke 2m",
+                "command": "{APP_DIR}\\mcps\\onec-database\\server\\OneCDatabase.exe",
+                "arguments": "--onec-db-wait-smoke-test --durations 120 --onec-db-root \"{APP_DIR}\"",
+                "log": true,
+                "background": false,
+                "confirmation": false,
+                "allowedWhileRunning": true
+            },
+            {
+                "title": "Wait smoke 5m",
+                "command": "{APP_DIR}\\mcps\\onec-database\\server\\OneCDatabase.exe",
+                "arguments": "--onec-db-wait-smoke-test --durations 300 --onec-db-root \"{APP_DIR}\"",
+                "log": true,
+                "background": false,
+                "confirmation": false,
+                "allowedWhileRunning": true
+            }
+        ],
+        "gitBranch": "release",
+        "upstreamMode": "external-http",
+        "upstreamHost": "127.0.0.1"
     },
     {
         "id":  "skills-aggregator",
