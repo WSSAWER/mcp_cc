@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src 'self'; connect-src 'none'">
+<title>CC — исполняемые правила</title>
+<style>
+:root { color-scheme: light; font-family: system-ui, sans-serif; color:#192532; background:#fafbfc; }
+body { max-width:1100px; margin:32px auto; padding:0 24px 48px; line-height:1.5; }
+h1,h2 { line-height:1.2; } h1 { font-size:28px; } h2 { font-size:22px; margin-top:40px; }
+nav { display:flex; flex-wrap:wrap; gap:16px; } a { color:#175aac; }
+.diagram { overflow:auto; padding:16px; background:white; border:1px solid #c5ced8; }
+.diagram svg { max-width:none !important; height:auto; display:block; margin:auto; }
+pre { overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; }
+summary { cursor:pointer; margin:12px 0; } table { width:100%; border-collapse:collapse; }
+td,th { border-bottom:1px solid #c5ced8; padding:10px; text-align:left; vertical-align:top; }
+th { background:#eef2f6; } td:last-child { overflow-wrap:anywhere; }
+.table { overflow:auto; } #render-status { font-weight:600; } .error { color:#ab122c; }
+@media (max-width:600px) { body { margin:16px auto; padding:0 12px 24px; } h1 { font-size:24px; } }
+</style></head><body><h1>CC — исполняемые правила</h1>
+<p>Сгенерировано из C# моделей. Для просмотра достаточно браузера; интернет и сервер не нужны.</p>
+<nav><a href="#overview">Общая схема</a><a href="#publication">Публикация</a><a href="#status">Статус MCP</a><a href="#actions">Действия</a><a href="#operation">Операция 1С</a><a href="#binary">CF/CFE</a><a href="workflows.md">Markdown</a></nav><p>Общая схема — навигационная карта компонентов CC. Детальные схемы и таблицы генерируются из исполняемых правил статуса, действий, портов и операций отдельного 1C Database. Это не полный граф классов: health, установка и группы хранилища не представлены как полностью моделируемые процессы.</p><p id="render-status" role="status">Подготовка схем…</p><h2 id="overview">Общая схема MCP Control Center</h2><p>CC управляет установкой, процессами и публикацией. Unified и отдельные Gate обращаются к внутреннему HTTP MCP. 1C Database — отдельный сервис, не часть EXE контроллера.</p><div class="diagram"><pre class="mermaid">flowchart TD
+  ui[&quot;Окно / трей&quot;]
+  cli[&quot;CLI / SSH&quot;]
+  admin[&quot;Admin MCP: Bearer&quot;]
+  store[&quot;Профили / JSON / PID&quot;]
+  install[&quot;Установка / удаление&quot;]
+  runner[&quot;Start / Stop / проверка PID&quot;]
+  client[&quot;MCP-клиенты&quot;]
+  unified[&quot;Unified: общий HTTP endpoint&quot;]
+  gate[&quot;Gate: отдельный внешний порт&quot;]
+  transport[&quot;Внутренний HTTP ↔ stdio&quot;]
+  mcp[&quot;Установленные MCP-процессы&quot;]
+  database[&quot;1C Database: отдельный EXE&quot;]
+  ui --&gt;|настройки| store
+  cli --&gt;|общие команды| admin
+  admin --&gt;|настройки| store
+  ui --&gt;|установить| install
+  ui --&gt;|управление| runner
+  admin --&gt;|управление| runner
+  install --&gt;|состояние установки| store
+  runner --&gt;|PID / конфиг| store
+  runner --&gt;|запуск / подхват| mcp
+  runner --&gt;|публикация| gate
+  client --&gt;|Streamable HTTP| unified
+  client --&gt;|Streamable HTTP| gate
+  unified --&gt;|внутренний HTTP; без отдельного Gate| mcp
+  gate --&gt;|HTTP / output gate| mcp
+  mcp --&gt;|для stdio MCP| transport
+  mcp --&gt;|native HTTP; без supergateway| database
+</pre></div><details><summary>Исходный Mermaid</summary><pre>flowchart TD
+  ui[&quot;Окно / трей&quot;]
+  cli[&quot;CLI / SSH&quot;]
+  admin[&quot;Admin MCP: Bearer&quot;]
+  store[&quot;Профили / JSON / PID&quot;]
+  install[&quot;Установка / удаление&quot;]
+  runner[&quot;Start / Stop / проверка PID&quot;]
+  client[&quot;MCP-клиенты&quot;]
+  unified[&quot;Unified: общий HTTP endpoint&quot;]
+  gate[&quot;Gate: отдельный внешний порт&quot;]
+  transport[&quot;Внутренний HTTP ↔ stdio&quot;]
+  mcp[&quot;Установленные MCP-процессы&quot;]
+  database[&quot;1C Database: отдельный EXE&quot;]
+  ui --&gt;|настройки| store
+  cli --&gt;|общие команды| admin
+  admin --&gt;|настройки| store
+  ui --&gt;|установить| install
+  ui --&gt;|управление| runner
+  admin --&gt;|управление| runner
+  install --&gt;|состояние установки| store
+  runner --&gt;|PID / конфиг| store
+  runner --&gt;|запуск / подхват| mcp
+  runner --&gt;|публикация| gate
+  client --&gt;|Streamable HTTP| unified
+  client --&gt;|Streamable HTTP| gate
+  unified --&gt;|внутренний HTTP; без отдельного Gate| mcp
+  gate --&gt;|HTTP / output gate| mcp
+  mcp --&gt;|для stdio MCP| transport
+  mcp --&gt;|native HTTP; без supergateway| database
+</pre></details><ul class="component-links"><li><a href="#actions">Окно / трей</a> — <code>MainForm</code></li><li><a href="control-center-cli.md">CLI / SSH</a> — <code>ControlCenterCli</code></li><li><a href="mcp-connection.md">Admin MCP: Bearer</a> — <code>AdminMcpServer</code></li><li><a href="control-center-help.md">Профили / JSON / PID</a> — <code>McpStore</code></li><li><a href="#actions">Установка / удаление</a> — <code>McpInstaller</code></li><li><a href="#status">Start / Stop / проверка PID</a> — <code>McpRunner</code></li><li><a href="mcp-connection.md">MCP-клиенты</a></li><li><a href="#publication">Unified: общий HTTP endpoint</a> — <code>UnifiedMcpHost</code></li><li><a href="#publication">Gate: отдельный внешний порт</a> — <code>EmbeddedGateHost</code></li><li><a href="#publication">Внутренний HTTP ↔ stdio</a> — <code>InternalTransport</code></li><li><a href="#operation">Установленные MCP-процессы</a></li><li><a href="#binary">1C Database: отдельный EXE</a></li></ul><h2 id="publication">Unified и отдельные внешние порты</h2><p>McpEndpointRules: одинаковые правила, независимые настройки. Порт 0 отключает публикацию, но не процесс MCP. Unified не зависит от внешнего Gate каждого MCP.</p><div class="diagram"><pre class="mermaid">flowchart LR
+  settings[&quot;UnifiedPort / ExternalPort: независимо&quot;]
+  settings --&gt;|0..0| p0[&quot;Disabled&quot;]
+  p0 --&gt; closed[&quot;Не открывать listener&quot;]
+  settings --&gt;|1..1023| p1[&quot;Reserved: closed (red)&quot;]
+  p1 --&gt; closed[&quot;Не открывать listener&quot;]
+  settings --&gt;|1024..65535| p2[&quot;Enabled&quot;]
+  p2 --&gt; open[&quot;Открыть HTTP listener&quot;]
+</pre></div><details><summary>Исходный Mermaid</summary><pre>flowchart LR
+  settings[&quot;UnifiedPort / ExternalPort: независимо&quot;]
+  settings --&gt;|0..0| p0[&quot;Disabled&quot;]
+  p0 --&gt; closed[&quot;Не открывать listener&quot;]
+  settings --&gt;|1..1023| p1[&quot;Reserved: closed (red)&quot;]
+  p1 --&gt; closed[&quot;Не открывать listener&quot;]
+  settings --&gt;|1024..65535| p2[&quot;Enabled&quot;]
+  p2 --&gt; open[&quot;Открыть HTTP listener&quot;]
+</pre></details><h2 id="operation">Операция 1C Database</h2><p>OneCDatabaseOperationLifecycle → OneCDatabaseOperation. Несколько процессов могут выполняться последовательно в одной операции. Конечный статус не перезаписывается поздними событиями.</p><div class="diagram"><pre class="mermaid">flowchart LR
+  subgraph detail_active[&quot;Внутри active&quot;]
+    starting[&quot;starting&quot;]
+    queued[&quot;queued&quot;]
+    running[&quot;running&quot;]
+  end
+  active[&quot;active: starting / queued / running&quot;]
+  completed[&quot;completed&quot;]
+  failed[&quot;failed&quot;]
+  timed_out[&quot;timed_out&quot;]
+  cancelled[&quot;cancelled&quot;]
+  hung[&quot;hung&quot;]
+  active --&gt;|&quot;Succeed&quot;| completed
+  active --&gt;|&quot;Fail&quot;| failed
+  active --&gt;|&quot;DeadlineExpired&quot;| timed_out
+  active --&gt;|&quot;Cancel&quot;| cancelled
+  active --&gt;|&quot;Inactivity&quot;| hung
+  starting --&gt;|&quot;Queue&quot;| queued
+  starting --&gt;|&quot;ProcessStarted&quot;| running
+  queued --&gt;|&quot;Queue&quot;| queued
+  queued --&gt;|&quot;ProcessStarted&quot;| running
+  running --&gt;|&quot;Queue&quot;| queued
+  running --&gt;|&quot;ProcessStarted&quot;| running
+  initial((&quot;начало&quot;)) --&gt; starting
+</pre></div><details><summary>Исходный Mermaid</summary><pre>flowchart LR
+  subgraph detail_active[&quot;Внутри active&quot;]
+    starting[&quot;starting&quot;]
+    queued[&quot;queued&quot;]
+    running[&quot;running&quot;]
+  end
+  active[&quot;active: starting / queued / running&quot;]
+  completed[&quot;completed&quot;]
+  failed[&quot;failed&quot;]
+  timed_out[&quot;timed_out&quot;]
+  cancelled[&quot;cancelled&quot;]
+  hung[&quot;hung&quot;]
+  active --&gt;|&quot;Succeed&quot;| completed
+  active --&gt;|&quot;Fail&quot;| failed
+  active --&gt;|&quot;DeadlineExpired&quot;| timed_out
+  active --&gt;|&quot;Cancel&quot;| cancelled
+  active --&gt;|&quot;Inactivity&quot;| hung
+  starting --&gt;|&quot;Queue&quot;| queued
+  starting --&gt;|&quot;ProcessStarted&quot;| running
+  queued --&gt;|&quot;Queue&quot;| queued
+  queued --&gt;|&quot;ProcessStarted&quot;| running
+  running --&gt;|&quot;Queue&quot;| queued
+  running --&gt;|&quot;ProcessStarted&quot;| running
+  initial((&quot;начало&quot;)) --&gt; starting
+</pre></details><p>Queue — очередь; ProcessStarted — очередной процесс; Succeed / Fail — завершение; DeadlineExpired — явный предел времени; Cancel — отмена; Inactivity — подтверждённый простой. Health MCP — отдельная проверка, не состояние этой операции. <a href="database-operation.mmd">Исходный stateDiagram Stateless</a>; выше — тот же граф переходов в представлении flowchart.</p><h2 id="binary">Загрузка и выгрузка CF/CFE</h2><p>Схема импортирована из отдельного OneCDatabase.exe. Занятая БД удерживает следующую операцию в очереди; одни настройки хранилища не означают занятость.</p><div class="diagram"><pre class="mermaid">flowchart LR
+  ExportValidate[&quot;Export: validate request / connection&quot;]
+  ExportValidate --&gt; ExportQueue[&quot;queued: wait while same database is busy&quot;]
+  ExportQueue --&gt;|success| ExportDumpCfg[&quot;/DumpCfg&quot;]
+  ExportDumpCfg --&gt;|failure| ExportFailed[&quot;failed + log; no later steps&quot;]
+  ExportDumpCfg --&gt;|success| ExportDone[&quot;verify file/result; clean private staging&quot;]
+  ImportValidate[&quot;Import: validate request / connection&quot;]
+  ImportValidate --&gt; ImportQueue[&quot;queued: wait while same database is busy&quot;]
+  ImportQueue --&gt;|success| ImportLoadCfg[&quot;/LoadCfg&quot;]
+  ImportLoadCfg --&gt;|failure| ImportFailed[&quot;failed + log; no later steps&quot;]
+  ImportLoadCfg --&gt;|success| ImportUpdateDBCfg[&quot;/UpdateDBCfg (opt-in)&quot;]
+  ImportUpdateDBCfg --&gt;|failure| ImportFailed[&quot;failed + log; no later steps&quot;]
+  ImportUpdateDBCfg --&gt;|success| ImportDone[&quot;verify file/result; clean private staging&quot;]
+  ImportLoadCfg --&gt;|updateDatabase=false| ImportDone
+</pre></div><details><summary>Исходный Mermaid</summary><pre>flowchart LR
+  ExportValidate[&quot;Export: validate request / connection&quot;]
+  ExportValidate --&gt; ExportQueue[&quot;queued: wait while same database is busy&quot;]
+  ExportQueue --&gt;|success| ExportDumpCfg[&quot;/DumpCfg&quot;]
+  ExportDumpCfg --&gt;|failure| ExportFailed[&quot;failed + log; no later steps&quot;]
+  ExportDumpCfg --&gt;|success| ExportDone[&quot;verify file/result; clean private staging&quot;]
+  ImportValidate[&quot;Import: validate request / connection&quot;]
+  ImportValidate --&gt; ImportQueue[&quot;queued: wait while same database is busy&quot;]
+  ImportQueue --&gt;|success| ImportLoadCfg[&quot;/LoadCfg&quot;]
+  ImportLoadCfg --&gt;|failure| ImportFailed[&quot;failed + log; no later steps&quot;]
+  ImportLoadCfg --&gt;|success| ImportUpdateDBCfg[&quot;/UpdateDBCfg (opt-in)&quot;]
+  ImportUpdateDBCfg --&gt;|failure| ImportFailed[&quot;failed + log; no later steps&quot;]
+  ImportUpdateDBCfg --&gt;|success| ImportDone[&quot;verify file/result; clean private staging&quot;]
+  ImportLoadCfg --&gt;|updateDatabase=false| ImportDone
+</pre></details><p><a href="binary-configuration-rules.md">Правила CF/CFE</a> · <a href="binary-configuration.mmd">Mermaid</a></p><h2 id="status">Базовый статус MCP</h2><p>McpWorkflowRules.Statuses → McpActionPolicy.StatusLabel. Первое совпадение. Подписи Installing/Command и health проверяются отдельно.</p><div class="diagram"><pre class="mermaid">flowchart TD
+  STATUS01{&quot;(установка завершилась ошибкой И НЕ (установлен))&quot;}
+  STATUS01 --&gt;|да| result0[&quot;Failed install&quot;]
+  STATUS01 --&gt;|нет| STATUS02
+  STATUS02{&quot;НЕ (установлен)&quot;}
+  STATUS02 --&gt;|да| result1[&quot;Not installed&quot;]
+  STATUS02 --&gt;|нет| STATUS03
+  STATUS03{&quot;процесс жив&quot;}
+  STATUS03 --&gt;|да| result2[&quot;Running&quot;]
+  STATUS03 --&gt;|нет| STATUS04
+  STATUS04{&quot;всегда&quot;}
+  STATUS04 --&gt;|да| result3[&quot;Stopped&quot;]
+</pre></div><details><summary>Исходный Mermaid</summary><pre>flowchart TD
+  STATUS01{&quot;(установка завершилась ошибкой И НЕ (установлен))&quot;}
+  STATUS01 --&gt;|да| result0[&quot;Failed install&quot;]
+  STATUS01 --&gt;|нет| STATUS02
+  STATUS02{&quot;НЕ (установлен)&quot;}
+  STATUS02 --&gt;|да| result1[&quot;Not installed&quot;]
+  STATUS02 --&gt;|нет| STATUS03
+  STATUS03{&quot;процесс жив&quot;}
+  STATUS03 --&gt;|да| result2[&quot;Running&quot;]
+  STATUS03 --&gt;|нет| STATUS04
+  STATUS04{&quot;всегда&quot;}
+  STATUS04 --&gt;|да| result3[&quot;Stopped&quot;]
+</pre></details><h2 id="actions">Доступность действий</h2><p>McpWorkflowRules.Actions → McpActionPolicy → MainForm. Условие истинно — кнопка доступна; ложно — недоступна. Это не заменяет проверки непосредственно при исполнении.</p><div class="table"><table><thead><tr><th>ID</th><th>Действие</th><th>Условие</th></tr></thead><tbody><tr><td>MCP01</td><td>Start</td><td>((установлен И НЕ (процесс жив)) И есть команда запуска)</td></tr><tr><td>MCP02</td><td>Stop</td><td>процесс жив</td></tr><tr><td>MCP03</td><td>Install</td><td>((НЕ (установлен) И НЕ (установка завершилась ошибкой)) И есть источник установки)</td></tr><tr><td>MCP04</td><td>Reinstall</td><td>(((установлен ИЛИ установка завершилась ошибкой) И НЕ (процесс жив)) И есть источник установки)</td></tr><tr><td>MCP05</td><td>RemoveFiles</td><td>(((установлен ИЛИ установка завершилась ошибкой) И НЕ (процесс жив)) И есть источник установки)</td></tr><tr><td>MCP06</td><td>Edit</td><td>всегда</td></tr><tr><td>MCP07</td><td>Delete</td><td>НЕ (процесс жив)</td></tr><tr><td>MCP08</td><td>UserCommand</td><td>(установлен И (НЕ (процесс жив) ИЛИ команда разрешена при работающем MCP))</td></tr><tr><td>MCP09</td><td>BatchStart</td><td>(((Active включён И установлен) И НЕ (процесс жив)) И есть команда запуска)</td></tr><tr><td>MCP10</td><td>BatchStop</td><td>процесс жив</td></tr><tr><td>MCP11</td><td>BatchRestart</td><td>((Active включён И установлен) И есть команда запуска)</td></tr></tbody></table></div><p>Исходники: <code>McpWorkflowRules.cs</code>, <code>OneCDatabaseOperationLifecycle.cs</code>. Генератор: <code>WorkflowDocumentation.cs</code>. Проверки условий независимы от генератора.</p>
+<script src="../assets/mermaid-11.12.2.min.js"></script>
+<script>
+(async () => {
+  const status = document.getElementById('render-status');
+  try {
+    if (!window.mermaid) throw new Error('Не найден локальный Mermaid. Сохраните всю папку docs вместе с assets.');
+    mermaid.initialize({startOnLoad:false, securityLevel:'strict', theme:'neutral', fontFamily:'system-ui', deterministicIds:true, deterministicIDSeed:'cc-workflows', state:{nodeSpacing:55, rankSpacing:75}});
+    await mermaid.run({nodes:document.querySelectorAll('.mermaid')});
+    for (const svg of document.querySelectorAll('.diagram svg')) svg.style.width = Math.min(svg.viewBox.baseVal.width, 1050) + 'px';
+    const count = document.querySelectorAll('.diagram svg').length;
+    if (count !== 5) throw new Error('Отрисованы не все схемы: ' + count);
+    status.textContent = 'Схемы загружены локально: ' + count;
+    document.documentElement.dataset.rendered = 'true';
+  } catch (error) { status.textContent = 'Ошибка: ' + error.message; status.className = 'error'; document.documentElement.dataset.rendered = 'error'; }
+})();
+</script></body></html>

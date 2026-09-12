@@ -1,0 +1,24 @@
+flowchart LR
+  subgraph detail_active["Внутри active"]
+    starting["starting"]
+    queued["queued"]
+    running["running"]
+  end
+  active["active: starting / queued / running"]
+  completed["completed"]
+  failed["failed"]
+  timed_out["timed_out"]
+  cancelled["cancelled"]
+  hung["hung"]
+  active -->|"Succeed"| completed
+  active -->|"Fail"| failed
+  active -->|"DeadlineExpired"| timed_out
+  active -->|"Cancel"| cancelled
+  active -->|"Inactivity"| hung
+  starting -->|"Queue"| queued
+  starting -->|"ProcessStarted"| running
+  queued -->|"Queue"| queued
+  queued -->|"ProcessStarted"| running
+  running -->|"Queue"| queued
+  running -->|"ProcessStarted"| running
+  initial(("начало")) --> starting

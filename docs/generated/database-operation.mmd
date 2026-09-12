@@ -1,0 +1,19 @@
+stateDiagram-v2
+	direction LR
+	state active {
+		starting
+		queued
+		running
+	}
+	active --> completed : Succeed
+	active --> failed : Fail
+	active --> timed_out : DeadlineExpired
+	active --> cancelled : Cancel
+	active --> hung : Inactivity
+	starting --> queued : Queue
+	starting --> running : ProcessStarted
+	queued --> queued : Queue
+	queued --> running : ProcessStarted
+	running --> queued : Queue
+	running --> running : ProcessStarted
+[*] --> starting

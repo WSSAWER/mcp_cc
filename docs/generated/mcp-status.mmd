@@ -1,0 +1,12 @@
+flowchart TD
+  STATUS01{"(установка завершилась ошибкой И НЕ (установлен))"}
+  STATUS01 -->|да| result0["Failed install"]
+  STATUS01 -->|нет| STATUS02
+  STATUS02{"НЕ (установлен)"}
+  STATUS02 -->|да| result1["Not installed"]
+  STATUS02 -->|нет| STATUS03
+  STATUS03{"процесс жив"}
+  STATUS03 -->|да| result2["Running"]
+  STATUS03 -->|нет| STATUS04
+  STATUS04{"всегда"}
+  STATUS04 -->|да| result3["Stopped"]

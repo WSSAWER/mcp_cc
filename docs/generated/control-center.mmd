@@ -1,0 +1,29 @@
+flowchart TD
+  ui["Окно / трей"]
+  cli["CLI / SSH"]
+  admin["Admin MCP: Bearer"]
+  store["Профили / JSON / PID"]
+  install["Установка / удаление"]
+  runner["Start / Stop / проверка PID"]
+  client["MCP-клиенты"]
+  unified["Unified: общий HTTP endpoint"]
+  gate["Gate: отдельный внешний порт"]
+  transport["Внутренний HTTP ↔ stdio"]
+  mcp["Установленные MCP-процессы"]
+  database["1C Database: отдельный EXE"]
+  ui -->|настройки| store
+  cli -->|общие команды| admin
+  admin -->|настройки| store
+  ui -->|установить| install
+  ui -->|управление| runner
+  admin -->|управление| runner
+  install -->|состояние установки| store
+  runner -->|PID / конфиг| store
+  runner -->|запуск / подхват| mcp
+  runner -->|публикация| gate
+  client -->|Streamable HTTP| unified
+  client -->|Streamable HTTP| gate
+  unified -->|внутренний HTTP; без отдельного Gate| mcp
+  gate -->|HTTP / output gate| mcp
+  mcp -->|для stdio MCP| transport
+  mcp -->|native HTTP; без supergateway| database

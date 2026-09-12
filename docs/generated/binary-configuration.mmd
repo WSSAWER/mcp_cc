@@ -1,0 +1,14 @@
+flowchart LR
+  ExportValidate["Export: validate request / connection"]
+  ExportValidate --> ExportQueue["queued: wait while same database is busy"]
+  ExportQueue -->|success| ExportDumpCfg["/DumpCfg"]
+  ExportDumpCfg -->|failure| ExportFailed["failed + log; no later steps"]
+  ExportDumpCfg -->|success| ExportDone["verify file/result; clean private staging"]
+  ImportValidate["Import: validate request / connection"]
+  ImportValidate --> ImportQueue["queued: wait while same database is busy"]
+  ImportQueue -->|success| ImportLoadCfg["/LoadCfg"]
+  ImportLoadCfg -->|failure| ImportFailed["failed + log; no later steps"]
+  ImportLoadCfg -->|success| ImportUpdateDBCfg["/UpdateDBCfg (opt-in)"]
+  ImportUpdateDBCfg -->|failure| ImportFailed["failed + log; no later steps"]
+  ImportUpdateDBCfg -->|success| ImportDone["verify file/result; clean private staging"]
+  ImportLoadCfg -->|updateDatabase=false| ImportDone

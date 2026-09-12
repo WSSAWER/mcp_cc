@@ -2,7 +2,7 @@
 
 MCP Control Center manages local MCP servers and the built-in HTTP gate. It does not configure AI models, llama-server slots, GPU, model context, or artificial MCP connection limits.
 
-The portable package includes an [offline overview and detailed workflow diagrams](docs/generated/index.html).
+The portable package includes an [offline overview and detailed workflow diagrams](index.html).
 Keep the `docs` folder beside the EXE when copying the application. The overview links to process status, actions, publication ports and the separate 1C Database CF/CFE workflow.
 
 For MCP clients, the preferred connection is the **Services -> Copy unified URL** address. It exposes one `/mcp` endpoint with tools from every Active MCP that is currently running.

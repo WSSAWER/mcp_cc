@@ -1,0 +1,8 @@
+flowchart LR
+  settings["UnifiedPort / ExternalPort: независимо"]
+  settings -->|0..0| p0["Disabled"]
+  p0 --> closed["Не открывать listener"]
+  settings -->|1..1023| p1["Reserved: closed (red)"]
+  p1 --> closed["Не открывать listener"]
+  settings -->|1024..65535| p2["Enabled"]
+  p2 --> open["Открыть HTTP listener"]
