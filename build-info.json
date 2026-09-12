@@ -1,6 +1,6 @@
 {
-  "sourceCommit": "c1dde44c9d5d9d8bfad8dd2e5b026bd7e8a608f9",
-  "executableSha256": "5F41C4310099271AD0EACCD2C5C8110A39939398EBC0ED0B1EE86DABB9F6642D",
+  "sourceCommit": "a0f3525c9a838e9c54007d3e054fb1e006b83c58",
+  "executableSha256": "674528DE26F76DE276717C3D1AB45A7087F6FDE7ADCC88E538050BB9EE5593BF",
   "target": "win-x64",
   "runtime": ".NET 7",
   "verifiedReleaseCommands": [

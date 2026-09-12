@@ -299,6 +299,20 @@ from database loading. A failed candidate does not enable synchronization.
 
 ### Start, observe and stop
 
+Git polling does not reserve the database: fetch and comparison with the last
+successfully applied commit happen first. An unchanged commit finishes without
+ibcmd, Designer, inventory queries or a connection lease. A changed commit waits
+for the database only if it changes loadable configuration files, then
+imports/applies through the existing queue. Documentation/index-only commits
+are acknowledged in sync history without a database load.
+The extension inventory is cached in the database instance. It is read once at
+startup/first use, invalidated on a new explicit connection or connection-settings
+change, and refreshed after native errors. Reusing a lease and successful ordinary
+commands do not invalidate it. Explicit `list_components(refresh=true)` and an
+unknown component also request a refresh. No inventory polling occurs per sync tick.
+See generated [Git cycle](docs/generated/git-sync.mmd) and
+[decision rules](docs/generated/sync-rules.md); build regenerates both.
+
 `sync_now(project, component, type, allowExecution=true)` schedules one cycle.
 `sync_auto(project, component, type, intervalSeconds, allowExecution=true)`
 creates/enables a persistent job. `type` is `git` or `repository`; component is
