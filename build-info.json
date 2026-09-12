@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "9e1461dfce4266eef381a2d38f25efacadcbef50",
+  "executableSha256": "5FE8E5D48ABC372F2E5A540F519054864370FF4D2F5E13D6A72C09049392C0D1",
+  "target": "win-x64",
+  "runtime": ".NET 7",
+  "verifiedReleaseCommands": [
+    "smoke-runtime.ps1",
+    "smoke-standalone.ps1"
+  ]
+}
