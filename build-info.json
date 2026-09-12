@@ -1,10 +1,10 @@
 {
-  "sourceCommit": "9e1461dfce4266eef381a2d38f25efacadcbef50",
-  "executableSha256": "5FE8E5D48ABC372F2E5A540F519054864370FF4D2F5E13D6A72C09049392C0D1",
-  "target": "win-x64",
-  "runtime": ".NET 7",
-  "verifiedReleaseCommands": [
-    "smoke-runtime.ps1",
-    "smoke-standalone.ps1"
-  ]
+    "sourceCommit":  "bd946733428d4404dc3dbc8dec3c9a9b310b26f0",
+    "executableSha256":  "C49F85D7D75F49550574DBD992CBBE95C7411490C03974AB571B1C4A7D2CDB2A",
+    "target":  "win-x64",
+    "runtime":  ".NET 7",
+    "verifiedReleaseCommands":  [
+                                    "smoke-runtime.ps1",
+                                    "smoke-standalone.ps1"
+                                ]
 }

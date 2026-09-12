@@ -12,6 +12,62 @@ mcps\onec-database\.generated\projects.json
 
 ## Validated database structure
 
+### Complete CF/CFE files (Designer)
+
+Two ready MCP commands use the saved, validated Designer connection:
+
+- `infobase_export_configuration(project, filePath, allowExecution=true)` exports
+  the **editable** main configuration to `.cf` with `/DumpCfg`.
+- `infobase_import_configuration(project, filePath, allowExecution=true)` loads
+  a complete `.cf` with `/LoadCfg`. This is **replacement**, not merging or
+  a partial object update. Back up the target before replacing it.
+- For an extension, pass `extension="ExactExtensionName"` and a `.cfe` path to
+  either command. Import can create an absent extension. Export does not create
+  one and does not implicitly refresh from a configuration repository.
+
+`filePath` is on the **MCP host**, not the chat computer. Relative paths and
+`{APP_DIR}` resolve against `--onec-db-root`; UNC paths require access by the
+service account. The input must already be there; these commands do not upload
+or download binary payloads over MCP. A file share or another explicit file
+transfer mechanism is needed between computers. XML, `.dt`, `.cfu`, empty input,
+linked files/directories and wrong CF/CFE target combinations are rejected.
+The platform validates the actual binary format and version compatibility.
+
+Both commands return `operationId` and `logId` immediately. Follow
+`list_operations` until terminal status, and use `search_log`/`get_log_file`
+for the native Designer `/Out` log. `result` reports the host path, byte count,
+SHA-256 and `fileExported`, `configurationLoaded`, `databaseUpdated` separately.
+The same database queue/lease, PID/resource watchdog and `cancel_operation`
+apply. No fixed overall duration limit by default; after 600 seconds continue
+checking the operation, not resubmitting it. `timeoutSeconds` is an optional
+explicit total deadline.
+
+Options:
+
+| Command | Option | Default | Behaviour |
+| --- | --- | --- | --- |
+| Export | `overwrite` | `false` | Replace an existing output only explicitly, after a successful nonempty export. Failure preserves the old file. |
+| Import | `updateDatabase` | `false` | After successful LoadCfg, apply all pending changes of this configuration/extension with UpdateDBCfg. |
+| Import | `terminateSessions` | `false` | Force blocking sessions out only when explicitly requested with `updateDatabase=true`. |
+| Import | `warningsAsErrors` | `true` | Treat UpdateDBCfg warnings as errors. |
+| Both | `configuratorIndex`, `leaseId` | saved/default | Select the configured Designer executable or reuse a connection lease. |
+
+Full binary import is blocked when the selected target has repository settings;
+use repository-aware object commands instead. No unbind, capture, unlock or
+commit is performed implicitly. A binding only present in 1C, but missing from
+MCP settings, is still subject to native platform restrictions. A failure after
+successful LoadCfg **does not roll back** that load: inspect the two result flags
+before retrying. Export publishes only a verified nonempty file; private import
+copies and incomplete export files are cleaned, while caller files and logs stay.
+
+In the source repository, the executable plan generates
+[the CF/CFE workflow](docs/generated/binary-configuration.mmd) and
+[the validation rules](docs/generated/binary-configuration-rules.md).
+Regression tests invoke public MCP commands and real isolated child processes,
+simulating only the 1C platform. They verify arguments, sequencing, partial
+failure results, destination preservation, logs, cancellation and serialization;
+they do not claim acceptance against a live 1C database.
+
 ### Configuration and extension components
 
 Each physical database owns one `configuration` component and its discovered
