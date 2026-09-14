@@ -369,8 +369,8 @@ other projects, configured Git checkouts, base data directories and persistent
 sync journals are not moved or deleted. `SYNC WORKSPACE` in the command log records
 the actual working directory.
 
-Each native ibcmd launch in Git synchronization (import/apply/check/reset) and
-component discovery receives a fresh server-data directory:
+Each named `run_ibcmd` operation, extension flag update, Git synchronization
+(import/apply/check/reset) and component discovery receives a fresh server-data directory:
 `<configured dataPath>/runs/run-<short project name>-<GUID>`.
 Its validated C# connection uses this directory as `--data`, without copying old
 `session-data`. SQL server/database/authentication and the explicit absolute
@@ -379,6 +379,12 @@ Its validated C# connection uses this directory as `--data`, without copying old
 only this invocation's data is removed. Cleanup first tries normal deletion, then
 clears ReadOnly attributes in the owned subtree and retries, without following links.
 A cleanup failure is logged with the retained path; a later launch never reuses it.
+Background requests return an operation ID without deleting the running task's
+workspace. Cleanup checks the original process handle; if it is alive or its exit
+cannot be confirmed, files are retained with a warning. Only owned directories
+are eligible for cleanup. Advanced `operation=custom` remains an explicit raw
+diagnostic command: its arguments and user-specified data are not rewritten/deleted.
+The generated cleanup decisions are in [ibcmd workspace rules](docs/generated/ibcmd-workspaces.md).
 This prevents reuse of stale session-data, but cannot guarantee that every native
 filesystem error is eliminated. Existing paused jobs are not resumed automatically.
 The first import is full; later imports use changed files where safe.

@@ -1,10 +1,11 @@
 {
-    "sourceCommit":  "56139021507fc6bca0405b186fb0aed436033837",
-    "executableSha256":  "1D8FCFCDCFF6557A6BB14C10CF3A8B3B0ED1C259C5F450F97917B3956689128B",
+    "sourceCommit":  "e74b78e7cc1f3ba496eb3b26b9b6b2c36b7040cd",
+    "executableSha256":  "96B9CED5F1F0720C3EDDE48720328206F640658F2D8C189B3D73A167F998E7E6",
     "target":  "win-x64",
     "runtime":  ".NET 7",
     "verifiedReleaseCommands":  [
                                     "smoke-runtime.ps1",
-                                    "smoke-standalone.ps1"
+                                    "smoke-standalone.ps1",
+                                    "smoke-ibcmd-workspaces.ps1"
                                 ]
 }
