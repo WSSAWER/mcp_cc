@@ -323,15 +323,28 @@ Paths, branch and credentials are not repeated in these calls.
 Both return a `jobId`; scheduling is **not** completed loading.
 `sync_info(project, jobId?)` reads all jobs or one job without contacting Git or
 1C. It reports phase, next check, real native `operationId`/PID when available,
-last successful version/time, error, and log URI. During validation/fetch there
+last successful version/time, error, and log URI. `GitFailure` retains the rejected
+commit, original error, operation/log IDs and validated source/connection revision;
+`LastPollLogId` points to the latest Git-only poll without replacing that error log.
+During validation/fetch there
 may be no native operation yet. Use `get_log_file` / `search_log` for command
 logs. After 600 seconds inspect status; elapsed time alone is not failure.
 
 `stop_sync(project, jobId, allowExecution=true)` disables future cycles and
 allows the current load to finish. Explicit `cancel_operation(operationId)` is
 a different action. Jobs are independent of chat/MCP sessions. Idle enabled jobs
-resume after service restart and revalidate their settings; interrupted loading
-or errors pause only the affected job until explicit resumption.
+resume after service restart and revalidate their settings. A failed Git import/apply
+with confirmed reset (exit 0, before any successful apply, not cancelled) enters
+`waiting_new_commit`: polling continues at the configured interval, but the rejected
+hash is never automatically imported again. A different fetched commit is validated
+and loaded normally. Polling does not mark the failed commit successful or erase its
+log. Transient Git poll errors retain this safe checkpoint and retry at the same interval.
+The checkpoint survives service restart; stopped jobs remain stopped. `sync_now` /
+`sync_auto` is an explicit resumption that permits retrying even the same hash.
+Interrupted loading, failed/missing reset, post-apply check failures, changed recovery
+scope, and legacy errors without rollback evidence remain `paused_error` until review
+and explicit resumption. A reset of the editable configuration is not proof of rolling
+back changes already applied to the database. One-shot jobs never start periodic polling.
 
 One physical DB has one write queue, even if multiple project names refer to it.
 Its components have independent schedules, but their native writes are
