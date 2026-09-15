@@ -50,7 +50,7 @@ Options:
 | Import | `updateDatabase` | `false` | After successful LoadCfg, apply all pending changes of this configuration/extension with UpdateDBCfg. |
 | Import | `terminateSessions` | `false` | Force blocking sessions out only when explicitly requested with `updateDatabase=true`. |
 | Import | `warningsAsErrors` | `true` | Treat UpdateDBCfg warnings as errors. |
-| Both | `configuratorIndex`, `leaseId` | saved/default | Select the configured Designer executable or reuse a connection lease. |
+| Both | `leaseId` | saved/default | Reuse a connection lease; the Designer EXE always comes from the connection's single `configuratorPath`. |
 
 Repository settings alone do not block binary import. Active operations on the
 same database serialize execution: the next import waits in `queued` state and
@@ -87,8 +87,8 @@ future jobs. Validation uses real Git access or a read-only Designer repository
 report. Failed candidates are saved as drafts, without replacing effective
 settings. Component repository passwords are protected with Windows DPAPI.
 
-For repository sources, supply `address`, `user`, `password`, and optional
-`configuratorIndex`. Configuration and extensions do not implicitly share
+For repository sources, supply `address`, `user`, `password`. Designer always
+uses the connection's single `configuratorPath`. Configuration and extensions do not implicitly share
 repository credentials. The probe verifies that a nonempty report can be read;
 it does **not** prove the existing IB binding or attach the IB to a repository.
 That binding must already match. Native integration against a real bound
@@ -113,7 +113,7 @@ queues.
 
 Set normal connection data with `upsert_project`:
 
-- Designer/IB: `configuratorPaths`, `infobaseServer`, `infobaseName`,
+- Designer/IB: `configuratorPath`, `infobaseServer`, `infobaseName`,
   `infobaseUser`, `infobasePassword`; a file base uses `infobaseFilePath` instead
   of server/name. The server may include its port.
 - ibcmd/SQL database: `ibcmdPath`, `dataPath`, `dbms`, `databaseServer`,
@@ -245,6 +245,10 @@ The normal flow does not require constructing a Designer command line:
 
 ### Designer: update files or add new root objects
 
+Each saved connection has exactly one `configuratorPath` (a string), used by all Designer, repository and CF/CFE commands, including background synchronization. Configure it with `upsert_project(name, configuratorPath)`; command calls never select an executable. `configuratorIndex` and new `configuratorPaths` inputs are rejected, not ignored. Relative EXE paths resolve against the MCP data root.
+
+On reading an old configuration file, one distinct nonempty path from `ConfiguratorPaths` migrates automatically. Multiple different or malformed paths are preserved in `DesignerPathMigrationIssue`; Designer is blocked for that connection until one `configuratorPath` is explicitly saved. Other connections and independently valid ibcmd settings remain usable. An explicit new path wins over an old list. The active list and old per-component indexes disappear on normal save. See generated `docs/generated/designer-path-rules.md`.
+
 Both commands use the saved, validated database binding and its Designer executable. `files` are paths **on the MCP machine**, not client-machine paths or inline content. Upload/copy files first when using a remote MCP. Both adding and updating accept the usual Designer hierarchy **or a flat staging directory**. The common normalizer reads the owning root's type, name and UUID from XML, even if the XML file has been renamed, and builds the canonical load hierarchy inside the private workspace. This applies to every supported root metadata type, not just roles.
 
 For example, a staging directory with a Role XML named `incoming.xml` and `Rights.xml` becomes `Roles/<XML-name>.xml` and `Roles/<XML-name>/Ext/Rights.xml`. Supply the entire staging directory or explicitly list the root XML and loose properties. Selecting only the root XML also includes its named companion directory and a sibling `Ext` directory; unrelated loose siblings are not silently selected. With several roots, use a separate staging directory per root or companion folders named after each root. Shared loose properties, conflicting destination paths and child metadata XML without an identifiable relative child directory are rejected **before any Designer/repository command**.
@@ -275,7 +279,7 @@ Example: `infobase_update_files(project="MyProject", connectionType="designer", 
 
 Repository setting state is built with the in-memory database instance at configuration load and refreshed after any saved profile change (including credentials). `get_project_runtime.repository` exposes `not_configured`, `configured`, or `invalid_settings`, the check time and `source=saved_project_settings`. This is not proof of live repository authentication or discovery of an unconfigured IB binding (`liveAccessVerified=false`). Repository operations still fail on actual access errors; availability is not guessed from a nonempty path.
 
-The generated load list includes the full Configuration bundle first and then the new objects; **`-partial` alone is not protection against losing Configuration's omitted external properties**. Existing-object updates do not load Configuration or its external files. The MCP verifies the root set and configuration UUID after loading. By default it then updates the database configuration with dynamic update disabled, warnings treated as errors, and permission to terminate blocking sessions. **Designer database update applies all pending changes of the selected editable configuration, including changes that predate this package.** Optional `terminateSessions=false` prohibits forced termination; `updateDatabase=false` changes only the editable configuration. `extension` selects an extension; `configuratorIndex` selects a saved Designer path. Platform support/repository locks remain enforced: the MCP does not bypass support restrictions or acquire someone else's locks.
+The generated load list includes the full Configuration bundle first and then the new objects; **`-partial` alone is not protection against losing Configuration's omitted external properties**. Existing-object updates do not load Configuration or its external files. The MCP verifies the root set and configuration UUID after loading. By default it then updates the database configuration with dynamic update disabled, warnings treated as errors, and permission to terminate blocking sessions. **Designer database update applies all pending changes of the selected editable configuration, including changes that predate this package.** Optional `terminateSessions=false` prohibits forced termination; `updateDatabase=false` changes only the editable configuration. `extension` selects an extension. Platform support/repository locks remain enforced: the MCP does not bypass support restrictions or acquire someone else's locks.
 
 The response is an operation, not a completion claim. By default there is no total-duration cutoff (`timeoutSeconds=0`); the owned loader PID/resource watchdog and explicit cancellation still apply. Set a positive timeout only when a total deadline is intended. Follow `list_operations`, `list_command_logs`/`search_log`, and `get_log_file`. The exact transmitted file list, byte counts and SHA-256 hashes are recorded as `LOAD FILE` entries in the downloadable command log. After successful load, verification and optional database update, the private `.generated/designer-files/<operationId>` tree is deleted (exports, index, load package and selection lists). Original caller files and permanent logs are never deleted. Failed operations retain their workspace for diagnosis; the log identifies its path. A successful load followed by a failed database update is **not a rollback**; inspect the native log before retrying. The older `infobase_load_objects` uses the same guarded update workflow and cannot add roots.
 

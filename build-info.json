@@ -1,12 +1,13 @@
 {
-    "sourceCommit":  "93c9063844c602a6d7da7bc01f6cc11e37d7b1d7",
-    "executableSha256":  "14C57956318A601D6CE8BA1121CBC6940241F49E0204C7020D8F479CB019C61C",
+    "sourceCommit":  "13f86765bde6f6ebd636a02f7928155218fbd6cf",
+    "executableSha256":  "20F7B5DE7795FC823EB8603FF0D1970E95AA17B59E630C90F5F5925F970FD4E6",
     "target":  "win-x64",
     "runtime":  ".NET 7",
     "verifiedReleaseCommands":  [
                                     "smoke-runtime.ps1",
                                     "smoke-standalone.ps1",
                                     "smoke-ibcmd-workspaces.ps1",
-                                    "smoke-designer-repository.ps1"
+                                    "smoke-designer-repository.ps1",
+                                    "smoke-designer-path.ps1"
                                 ]
 }
