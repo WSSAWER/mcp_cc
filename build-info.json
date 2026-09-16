@@ -1,6 +1,6 @@
 {
-  "sourceCommit": "f2715986de97ce9daac40589f516b7d39b76fa2a",
-  "executableSha256": "69031A185102D2C99BBE1EFC5EF6EDD53DD392946471FEE7DF59A058A2646A54",
+  "sourceCommit": "6a0931478ef4d70e1ea6677e0a92e5051ead4f44",
+  "executableSha256": "78695A9F292A663B59818052A1B71AB80161408BCC0BD97B1DDE448695477895",
   "target": "win-x64",
   "runtime": ".NET 7",
   "verifiedReleaseCommands": [
@@ -9,6 +9,7 @@
     "smoke-ibcmd-workspaces.ps1",
     "smoke-designer-repository.ps1",
     "smoke-designer-path.ps1",
-    "smoke-sync-scheduling.ps1"
+    "smoke-sync-scheduling.ps1",
+    "smoke-configuration-export.ps1"
   ]
 }

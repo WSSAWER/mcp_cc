@@ -483,6 +483,25 @@ To recursively export one object from the information-base configuration, call `
 
 Use `list_operations` to read its active step, current/last PID, state, elapsed time, and log path. Use `cancel_operation` for a controlled process-tree termination.
 
+The same command accepts `objectName="Configuration"` (also `Конфигурация`).
+This selects **only `Configuration.xml` and its complete root `Ext` subtree**,
+including modules, interfaces, pictures and nested/binary properties. It does not
+select catalogs, documents, common modules or other metadata roots. One Designer
+process uses a list containing exactly `Configuration`; no ConfigDumpInfo
+discovery or full-tree expansion is needed. It reads the editable configuration,
+not the repository, and does not capture objects or update the database.
+
+For this mode `outputPath` must be a new or empty directory on the MCP host.
+The service checks its private export before copying any files to the destination;
+exit 0 without a valid manifest, or an unexpected other root, is a failure.
+`list_operations[].result.files` lists relative paths, byte counts and SHA-256.
+Logs remain downloadable after private staging cleanup. Existing destination
+files are never removed or overwritten; an I/O failure during publication can
+leave partial output, so always check operation status before using the files.
+`extension` optionally selects an extension's own Configuration bundle.
+`build_recursive_infobase_export_plan` previews either mode without running it.
+Generated rules: `docs/generated/designer-export.md` and `designer-export.mmd`.
+
 Repository commands use the validated IB/Designer binding and the repository address, user, and password. Passwords are never returned by `get_project`; only password-configured indicators are returned.
 
 ## Long-running operations
