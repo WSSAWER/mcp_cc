@@ -1,0 +1,11 @@
+flowchart TD
+  request[Scheduling request] --> r0
+  r0{"sync.schedule.running_same: Cycle running; sync_auto repeats the enabled interval"} -->|yes| o0["Keep the existing cycle and schedule unchanged."]
+  r0 -->|no| r1
+  r1{"sync.schedule.running: Cycle running; any other scheduling request"} -->|yes| o1["sync_running: inspect sync_info; do not start a duplicate."]
+  r1 -->|no| r2
+  r2{"sync.schedule.auto: No running cycle; sync_auto"} -->|yes| o2["Enable automatic polling with the requested interval; schedule now."]
+  r2 -->|no| r3
+  r3{"sync.schedule.now_auto: No running cycle; sync_now; automatic mode already enabled"} -->|yes| o3["Schedule now; preserve automatic mode and its saved interval."]
+  r3 -->|no| r4
+  r4{"sync.schedule.now_once: No running cycle; sync_now; new or disabled job"} -->|yes| o4["Schedule one cycle without enabling automatic mode; preserve the saved interval."]

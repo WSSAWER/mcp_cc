@@ -1,0 +1,24 @@
+stateDiagram-v2
+	direction LR
+	Preparing --> RootCaptured : CaptureRoot
+	Preparing --> Validated : Validate
+	Preparing --> Failed : Fail
+	RootCaptured --> Validated : Validate
+	RootCaptured --> Failed : Fail
+	Validated --> ObjectsCaptured : CaptureObjects
+	Validated --> Loaded : Load
+	Validated --> Failed : Fail
+	ObjectsCaptured --> Loaded : Load
+	ObjectsCaptured --> Failed : Fail
+	Loaded --> Verified : Verify
+	Loaded --> Failed : Fail
+	Verified --> Applied : Apply
+	Verified --> Committed : Commit
+	Verified --> Completed : Complete
+	Verified --> Failed : Fail
+	Applied --> Committed : Commit
+	Applied --> Completed : Complete
+	Applied --> Failed : Fail
+	Committed --> Completed : Complete
+	Committed --> Failed : Fail
+[*] --> Preparing

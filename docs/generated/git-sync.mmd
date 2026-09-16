@@ -1,0 +1,17 @@
+stateDiagram-v2
+	direction LR
+	fetching --> no_changes : Unchanged
+	fetching --> waiting_new_commit : RejectedCommit
+	fetching --> reserving : UpdateRequired
+	fetching --> failed : Fail
+	reserving --> importing : Reserved
+	reserving --> waiting_database : Busy
+	reserving --> failed : Fail
+	importing --> checking_updates : Imported
+	importing --> failed : Fail
+	checking_updates --> importing : NewerCommit
+	checking_updates --> applying : CaughtUp
+	checking_updates --> failed : Fail
+	applying --> completed : Applied
+	applying --> failed : Fail
+[*] --> fetching

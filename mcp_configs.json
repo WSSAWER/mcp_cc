@@ -476,7 +476,7 @@
         "errorLog": "{APP_DIR}\\mcps\\onec-database\\mcp.err.log",
         "installMethod": "git",
         "npmPackage": "",
-        "gitRepository": "https://github.com/WSSAWER/onec_database.git",
+        "gitRepository": "https://github.com/WSSAWER/mcp_cc.git",
         "builtinTemplate": "",
         "commands": [
             {
@@ -516,7 +516,7 @@
                 "allowedWhileRunning": true
             }
         ],
-        "gitBranch": "release",
+        "gitBranch": "onec-database",
         "upstreamMode": "external-http",
         "upstreamHost": "127.0.0.1"
     },
