@@ -535,6 +535,12 @@ The installable Git branch is `release`; it contains the binary and product file
 Repository: `https://github.com/WSSAWER/onec_database.git`. Source is maintained
 on `main`; `.agents/publish-release.ps1` verifies the Release runtime and publishes
 only the portable payload to `release`. Run the complete Debug smoke suite first.
+The same tested binary commit is mirrored to the public delivery repository
+`https://github.com/WSSAWER/mcp_cc.git`, branch `onec-database` (the MCP ID).
+Control Center installs this public branch without Git credentials. It contains
+only the EXE, product documentation, third-party licenses and SHA-256 manifest;
+source, database settings and credentials are never included. Both publications
+are performed by the same release script; failure of either fails publication.
 
 Keep the same `--onec-db-root` when replacing the old builtin host. This preserves
 projects, operation logs, synchronization state and the single-owner lock. The
