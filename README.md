@@ -329,7 +329,13 @@ unknown component also request a refresh. No inventory polling occurs per sync t
 See generated [Git cycle](docs/generated/git-sync.mmd) and
 [decision rules](docs/generated/sync-rules.md); build regenerates both.
 
-`sync_now(project, component, type, allowExecution=true)` schedules one cycle.
+`sync_now(project, component, type, allowExecution=true)` schedules an immediate cycle.
+For an already automatic job it preserves automatic mode and its saved interval;
+for a new/stopped job it runs once without enabling polling. It never disables
+automatic mode. A running cycle rejects duplicate requests without changing its
+schedule. The response reports the effective `automatic` mode and interval.
+See generated [scheduling rules](docs/generated/sync-scheduling.md) and
+[decision flow](docs/generated/sync-scheduling.mmd).
 `sync_auto(project, component, type, intervalSeconds, allowExecution=true)`
 creates/enables a persistent job. `type` is `git` or `repository`; component is
 explicitly `configuration`, `extension:<name>`, or an ID from `list_components`.
