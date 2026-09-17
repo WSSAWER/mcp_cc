@@ -1,6 +1,6 @@
 {
-  "sourceCommit": "6a0931478ef4d70e1ea6677e0a92e5051ead4f44",
-  "executableSha256": "78695A9F292A663B59818052A1B71AB80161408BCC0BD97B1DDE448695477895",
+  "sourceCommit": "8b7f61c943d8b1045d4ab60103bd1b795f5ef4e4",
+  "executableSha256": "B433EE8AF1C5EE8E7E2E4E29A7943736D0DE2FD67121EF901339BC1058859A93",
   "target": "win-x64",
   "runtime": ".NET 7",
   "verifiedReleaseCommands": [
@@ -10,6 +10,8 @@
     "smoke-designer-repository.ps1",
     "smoke-designer-path.ps1",
     "smoke-sync-scheduling.ps1",
-    "smoke-configuration-export.ps1"
+    "smoke-configuration-export.ps1",
+    "smoke-git-retry.ps1",
+    "smoke-sync-recovery.ps1"
   ]
 }

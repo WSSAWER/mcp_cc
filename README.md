@@ -360,13 +360,25 @@ with confirmed reset (exit 0, before any successful apply, not cancelled) enters
 `waiting_new_commit`: polling continues at the configured interval, but the rejected
 hash is never automatically imported again. A different fetched commit is validated
 and loaded normally. Polling does not mark the failed commit successful or erase its
-log. Transient Git poll errors retain this safe checkpoint and retry at the same interval.
+log. Git/SSH access failures before database reservation enter `waiting_git_retry`:
+enabled automatic jobs retry once per hour (3600 seconds after each failure),
+preserving the error, log and any rejected-commit checkpoint. `sync_info` exposes
+`GitRetryAfterUtc` and `NextCheckUtc`. After access recovers, the saved normal
+interval resumes. The retry time survives service restart; no database lease is
+held while waiting. Native import/apply errors do not gain this retry permission.
 The checkpoint survives service restart; stopped jobs remain stopped. `sync_now` /
 `sync_auto` is an explicit resumption that permits retrying even the same hash.
 Interrupted loading, failed/missing reset, post-apply check failures, changed recovery
 scope, and legacy errors without rollback evidence remain `paused_error` until review
 and explicit resumption. A reset of the editable configuration is not proof of rolling
 back changes already applied to the database. One-shot jobs never start periodic polling.
+
+To resume an existing job without resending paths, credentials, component or interval:
+`resume_sync(project, allowExecution=true)`. If the database has multiple saved jobs,
+add `jobId` from `sync_info`. This explicit command enables automatic polling at the
+saved interval and requests a cycle now, including for a stopped job; it does not
+create another job or restart a running cycle. Readiness is checked again. Inspect
+an interrupted native load before resuming it; scheduling is not proof of success.
 
 One physical DB has one write queue, even if multiple project names refer to it.
 Its components have independent schedules, but their native writes are
