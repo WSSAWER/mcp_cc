@@ -59,7 +59,9 @@ capture, unlock or commit is performed implicitly; native 1C restrictions and
 explicit connection leases still apply. A failure after
 successful LoadCfg **does not roll back** that load: inspect the two result flags
 before retrying. Export publishes only a verified nonempty file; private import
-copies and incomplete export files are cleaned, while caller files and logs stay.
+copies and incomplete export files are cleaned on success/cancellation. Failed
+temporary files remain for 7 days from filesystem creation; inactive command
+logs remain for 30 days. Caller inputs and completed export files are preserved.
 
 In the source repository, the executable plan generates
 [the CF/CFE workflow](docs/generated/binary-configuration.mmd) and
@@ -68,6 +70,12 @@ Regression tests invoke public MCP commands and real isolated child processes,
 simulating only the 1C platform. They verify arguments, sequencing, partial
 failure results, destination preservation, logs, cancellation and serialization;
 they do not claim acceptance against a live 1C database.
+
+All loading routes and their cleanup/error branches are collected in
+[generated loading workflows](docs/generated/load-workflows.md). Build commands
+regenerate these diagrams from the executable models; `.agents/export-workflows.ps1
+-Check` checks freshness. These diagrams describe the implementation, not proof
+of compatibility with a particular installed 1C platform.
 
 ### Configuration and extension components
 
@@ -261,7 +269,7 @@ Named companion folders and object-relative `Forms`, `Templates`, nested `Subsys
 
 `infobase_update_files` rejects the entire request if any root is missing in the current configuration or its UUID differs. `infobase_add_objects` accepts only new roots and rejects mixed new/existing roots and UUID collisions. **Pass only the new object files. Do not obtain or edit Configuration yourself:** caller-supplied `Configuration`, `Configuration.xml`, root `Ext` files and whole configuration-dump directories are rejected before any Designer/capture command.
 
-For addition, the MCP exports the current Configuration and metadata index. The root-only `/DumpConfigToFiles -listFile` selection contains `Configuration`, so Designer also supplies its external properties. The MCP preserves the **complete exported bundle** (`Configuration.xml` plus every `Ext` file, recursively, including modules, interfaces, binary files and parent `.cf` files). There is no hardcoded file count or extension filter. It copies that bundle byte-for-byte into a private load package, edits only the manifest entries and adds the new object bundles. New entries go at the **end of their existing type group** in `ChildObjects`; an absent group is inserted in metadata type order. They are not appended indiscriminately at the end of Configuration. A second export rejects concurrent manifest or external-property changes before loading. Caller files are not changed; changed inputs during preparation abort the operation.
+Existing-object updates read only `ConfigDumpInfo.xml` before preparation, immediately before loading and after loading: they do not export Configuration or its `Ext`/parent CF files. For additions, the MCP first reads that index, copies it privately and changes only the Configuration root version token. It uses `/DumpConfigToFiles -update -configDumpInfoForChanges` to request the root-description delta. Every external-property version stays unchanged. The export must contain only `Configuration.xml` and optionally `ConfigDumpInfo.xml`; any other file fails the operation before loading, without a full-export fallback. This guards against concurrent edits and unexpected platform behaviour. The caller never supplies Configuration. New entries go at the **end of their existing type group** in `ChildObjects`; an absent group is inserted in metadata type order. Fresh index comparison rejects concurrent root/selected-object changes before loading. Caller files are not changed; changed inputs during preparation abort the operation.
 
 Both file commands accept `repositoryMode`:
 
@@ -279,9 +287,9 @@ Example: `infobase_update_files(project="MyProject", connectionType="designer", 
 
 Repository setting state is built with the in-memory database instance at configuration load and refreshed after any saved profile change (including credentials). `get_project_runtime.repository` exposes `not_configured`, `configured`, or `invalid_settings`, the check time and `source=saved_project_settings`. This is not proof of live repository authentication or discovery of an unconfigured IB binding (`liveAccessVerified=false`). Repository operations still fail on actual access errors; availability is not guessed from a nonempty path.
 
-The generated load list includes the full Configuration bundle first and then the new objects; **`-partial` alone is not protection against losing Configuration's omitted external properties**. Existing-object updates do not load Configuration or its external files. The MCP verifies the root set and configuration UUID after loading. By default it then updates the database configuration with dynamic update disabled, warnings treated as errors, and permission to terminate blocking sessions. **Designer database update applies all pending changes of the selected editable configuration, including changes that predate this package.** Optional `terminateSessions=false` prohibits forced termination; `updateDatabase=false` changes only the editable configuration. `extension` selects an extension. Platform support/repository locks remain enforced: the MCP does not bypass support restrictions or acquire someone else's locks.
+For additions the load list contains **only `Configuration.xml` and new object files**, with mandatory `-partial`. Installed platform 8.3.27 help (`zif3_loadconfigfromfiles`) documents independent loading of a metadata description without its external properties. Root `Ext` and parent CF files are not copied into the load package. Existing-object updates do not load Configuration at all. The MCP verifies the root set and UUIDs using the post-load index. By default it then updates the database configuration with dynamic update disabled, warnings treated as errors, and permission to terminate blocking sessions. **Designer database update applies all pending changes of the selected editable configuration, including changes that predate this package.** Optional `terminateSessions=false` prohibits forced termination; `updateDatabase=false` changes only the editable configuration. `extension` selects an extension. Platform support/repository locks remain enforced: the MCP does not bypass support restrictions or acquire someone else's locks. The manifest-only export/import route is covered by process-level simulations; a native platform compatibility test is still required before claiming real-1C verification of this route.
 
-The response is an operation, not a completion claim. By default there is no total-duration cutoff (`timeoutSeconds=0`); the owned loader PID/resource watchdog and explicit cancellation still apply. Set a positive timeout only when a total deadline is intended. Follow `list_operations`, `list_command_logs`/`search_log`, and `get_log_file`. The exact transmitted file list, byte counts and SHA-256 hashes are recorded as `LOAD FILE` entries in the downloadable command log. After successful load, verification and optional database update, the private `.generated/designer-files/<operationId>` tree is deleted (exports, index, load package and selection lists). Original caller files and permanent logs are never deleted. Failed operations retain their workspace for diagnosis; the log identifies its path. A successful load followed by a failed database update is **not a rollback**; inspect the native log before retrying. The older `infobase_load_objects` uses the same guarded update workflow and cannot add roots.
+The response is an operation, not a completion claim. By default there is no total-duration cutoff (`timeoutSeconds=0`); the owned loader PID/resource watchdog and explicit cancellation still apply. Set a positive timeout only when a total deadline is intended. Follow `list_operations`, `list_command_logs`/`search_log`, and `get_log_file`. The exact transmitted file list, byte counts and SHA-256 hashes are recorded as `LOAD FILE` entries in the downloadable command log. Successful and explicitly cancelled operations clean their private files after confirmed child exit. Failed/crashed operations retain them for **7 days from filesystem creation time**, not modification time; no retention timestamp is duplicated in settings. Cleanup runs at owner startup and once a minute, retries locked files, and never removes caller inputs/outputs, saved settings, checkouts or database files. This applies to registered Designer, binary staging, Git snapshots and ibcmd invocation workspaces. Command/native logs are retained **30 days**, with active logs protected. See [temporary-file rules](docs/generated/temporary-files.md) and [log retention](docs/generated/log-retention.md). A successful load followed by a failed database update is **not a rollback**; inspect the native log before retrying. The older `infobase_load_objects` uses the same guarded update workflow and cannot add roots.
 
 Verification: run `.test/smoke-all.ps1` with `smoke-onec-database-designer-files.ps1` for isolated process-level tests. The opt-in `smoke-onec-database-designer-live.ps1` uses `MCP_DESIGNER_TEST_MODE=probe` for read-only connection/export, or `write` for a real test database. Set `MCP_DESIGNER_TEST_EXE`, `SERVER`, `DATABASE`, `USER`, `PASSWORD`, and `ROOT` in the test process environment (the shared prefix applies to each name). The write test adds a uniquely named harmless common module, updates it, reads it back, and verifies mixed-root rejection without forcibly terminating sessions. It retains the test object and artifacts for inspection; never point it at a production database.
 
@@ -410,7 +418,8 @@ Its validated C# connection uses this directory as `--data`, without copying old
 `session-data`. SQL server/database/authentication and the explicit absolute
 `--database-path` of a file IB stay unchanged; `ibcmd.exe` is not copied.
 `IBCMD DATA` records the exact path in the command log. After native process exit,
-only this invocation's data is removed. Cleanup first tries normal deletion, then
+only this invocation's data is eligible for cleanup: success/cancellation immediately,
+failure after 7 days from creation. Cleanup first tries normal deletion, then
 clears ReadOnly attributes in the owned subtree and retries, without following links.
 A cleanup failure is logged with the retained path; a later launch never reuses it.
 Background requests return an operation ID without deleting the running task's

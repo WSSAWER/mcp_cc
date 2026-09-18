@@ -1,6 +1,6 @@
 {
-  "sourceCommit": "8b7f61c943d8b1045d4ab60103bd1b795f5ef4e4",
-  "executableSha256": "B433EE8AF1C5EE8E7E2E4E29A7943736D0DE2FD67121EF901339BC1058859A93",
+  "sourceCommit": "4f8f6cd94be6a8089bfaf1cf39d17a29c3c3445a",
+  "executableSha256": "A6543DB26DBA0C9A0FABA057AC543CD34D10FE2532DBAD765F772773AE6784EE",
   "target": "win-x64",
   "runtime": ".NET 7",
   "verifiedReleaseCommands": [
@@ -12,6 +12,8 @@
     "smoke-sync-scheduling.ps1",
     "smoke-configuration-export.ps1",
     "smoke-git-retry.ps1",
-    "smoke-sync-recovery.ps1"
+    "smoke-sync-recovery.ps1",
+    "smoke-temporary-cleanup.ps1",
+    "smoke-binary.ps1"
   ]
 }
