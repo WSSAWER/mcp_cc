@@ -1,0 +1,16 @@
+stateDiagram-v2
+	direction LR
+	Preparing --> ReadingIndex : Read
+	Preparing --> Failed : Fail
+	ReadingIndex --> Exporting : Export
+	ReadingIndex --> SavingCheckpoint : Save
+	ReadingIndex --> Failed : Fail
+	Exporting --> Publishing : Publish
+	Exporting --> Failed : Fail
+	Publishing --> Committing : Commit
+	Publishing --> Failed : Fail
+	Committing --> SavingCheckpoint : Save
+	Committing --> Failed : Fail
+	SavingCheckpoint --> Completed : Complete
+	SavingCheckpoint --> Failed : Fail
+[*] --> Preparing

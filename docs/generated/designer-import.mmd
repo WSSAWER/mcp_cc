@@ -1,15 +1,26 @@
 stateDiagram-v2
 	direction LR
-	Preparing --> RootCaptured : CaptureRoot
-	Preparing --> Validated : Validate
+	Preparing --> Acquired : Acquire
 	Preparing --> Failed : Fail
-	RootCaptured --> Validated : Validate
+	Acquired --> RootCaptured : CaptureRoot
+	Acquired --> IndexRead : ReadIndex
+	Acquired --> Failed : Fail
+	RootCaptured --> IndexRead : ReadIndex
 	RootCaptured --> Failed : Fail
+	IndexRead --> ManifestRead : ReadManifest
+	IndexRead --> Validated : Validate
+	IndexRead --> Failed : Fail
+	ManifestRead --> Validated : Validate
+	ManifestRead --> Failed : Fail
 	Validated --> ObjectsCaptured : CaptureObjects
-	Validated --> Loaded : Load
+	Validated --> PackagePrepared : PreparePackage
 	Validated --> Failed : Fail
-	ObjectsCaptured --> Loaded : Load
+	ObjectsCaptured --> PackagePrepared : PreparePackage
 	ObjectsCaptured --> Failed : Fail
+	PackagePrepared --> Rechecked : Recheck
+	PackagePrepared --> Failed : Fail
+	Rechecked --> Loaded : Load
+	Rechecked --> Failed : Fail
 	Loaded --> Verified : Verify
 	Loaded --> Failed : Fail
 	Verified --> Applied : Apply
@@ -22,3 +33,18 @@ stateDiagram-v2
 	Committed --> Completed : Complete
 	Committed --> Failed : Fail
 [*] --> Preparing
+state "Preparing: Validate saved binding and input identities; reject caller Configuration and ambiguous paths" as Preparing
+state "Acquired: Wait for and acquire the database operation lease; own private workspace" as Acquired
+state "RootCaptured: Add + automatic repository: capture Configuration NONRECURSIVELY; no forced capture" as RootCaptured
+state "IndexRead: Dump ConfigDumpInfo only; read format, root names, UUIDs and versions" as IndexRead
+state "ManifestRead: Add only: root-version delta export; require only Configuration.xml and optional index; no full fallback" as ManifestRead
+state "Validated: Update: existing names and UUIDs; add: new names and unique UUIDs; validate XML version" as Validated
+state "ObjectsCaptured: Update + automatic repository: capture selected existing roots recursively" as ObjectsCaptured
+state "PackagePrepared: Verify source hashes; copy only input files; add only: append names to matching groups in Configuration.xml" as PackagePrepared
+state "Rechecked: Fresh index: refuse changed identity, root set or selected metadata; no Configuration/CF export" as Rechecked
+state "Loaded: Log exact list, sizes and SHA-256; LoadConfigFromFiles listFile + partial; later error is NOT rollback" as Loaded
+state "Verified: Fresh post-load index: verify expected root set, UUIDs and unchanged Configuration external properties before apply/commit" as Verified
+state "Applied: Optional UpdateDBCfg: all pending changes; Dynamic-; session policy and warningsAsErrors" as Applied
+state "Committed: capture_and_commit only: selected roots recursively; add includes Configuration nonrecursively" as Committed
+state "Completed: Confirm child exit; clean owned files; keep downloadable logs for 30 days; preserve caller files" as Completed
+state "Failed: Record exact error/partial outcome; stop owned process if needed; no rollback/unlock; retain failed files 7 days" as Failed

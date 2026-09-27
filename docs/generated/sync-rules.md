@@ -28,6 +28,15 @@ Git fetch and commit comparison never reserve a database connection. An unchange
 | recovery.watch | Import/apply failed, reset exited 0, apply never succeeded, not cancelled | Enabled Git job keeps polling; retain failure and last-successful version. |
 | recovery.same_commit | Fetched hash equals the rejected hash | Wait for a new commit; no inventory, database lease or native command. |
 | recovery.new_commit | Fetched hash differs; source/connection unchanged | Validate source, then reserve DB and import; clear failure only after successful apply/check. |
-| recovery.poll_error | Git-only check fails while a safe checkpoint exists | Retain checkpoint and retry polling at the configured interval. |
+| recovery.poll_error | Git-only access fails before DB reservation | Retain diagnostics/checkpoint; apply Git access retry rules below. |
 | recovery.restart | Persisted safe checkpoint; no interrupted native load | Restore Git polling. Old errors without rollback evidence remain paused. |
 | recovery.disabled | Job was stopped | No polling or automatic resumption. |
+
+## Git access retry
+
+| Rule ID | Condition | Retry | Result |
+| --- | --- | --- | --- |
+| git.retry.native | Database route already reserved | False | Use native recovery rules; never replay an uncertain import. |
+| git.retry.disabled | Not an enabled automatic Git job | False | Do not enable polling for stopped or one-shot jobs. |
+| git.retry.access | Typed Git network/authentication failure before reservation | True | Retry saved Git source after 3600 seconds; keep error and logs visible. |
+| git.retry.other | Other error (validation, credentials ownership, dirty checkout, etc.) | False | No new retry permission; retain existing safe recovery policy. |

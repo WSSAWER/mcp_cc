@@ -1,0 +1,8 @@
+flowchart TD
+  r0{"temp.owner_active: Scope is open and owner is alive or unknown"} -->|yes| retain[Retain and retry next minute]
+  r0 -->|no| r1
+  r1{"temp.child_unconfirmed: Child launch/exit is not confirmed"} -->|yes| retain[Retain and retry next minute]
+  r1 -->|no| r2
+  r2{"temp.failure_week: Failed operation's file/directory was created less than 7 days ago"} -->|yes| retain[Retain and retry next minute]
+  r2 -->|no| r3
+  r3{"temp.finished: Scope closed or owner exited, all children exited"} -->|yes| remove[Remove owned paths; retry on file lock]

@@ -1,6 +1,7 @@
 stateDiagram-v2
 	direction LR
 	fetching --> no_changes : Unchanged
+	fetching --> waiting_git_retry : AccessUnavailable
 	fetching --> waiting_new_commit : RejectedCommit
 	fetching --> reserving : UpdateRequired
 	fetching --> failed : Fail
@@ -15,3 +16,14 @@ stateDiagram-v2
 	applying --> completed : Applied
 	applying --> failed : Fail
 [*] --> fetching
+state "fetching: Lock checkout; fetch saved remote/branch with saved SSH; compare last success; validate clean linear source; NO DB lease" as fetching
+state "no_changes: No new loadable files: acknowledge version without inventory, Designer or ibcmd" as no_changes
+state "waiting_new_commit: Rejected hash unchanged: retain original failure; wait for a newer commit without DB calls" as waiting_new_commit
+state "waiting_git_retry: Git/SSH unavailable: retain error; automatic retry after one hour; no DB lease" as waiting_git_retry
+state "reserving: Changed files only: resolve component inventory; reserve saved adapter and database queue" as reserving
+state "importing: Immutable commit snapshot; validate files; ibcmd config import full source or changed files with partial; tracked PID and private working data" as importing
+state "checking_updates: Fetch again AFTER import and BEFORE apply; a newer commit is imported under the same lease" as checking_updates
+state "applying: No newer commit: ibcmd config apply force, then config check; preserve last success until BOTH finish" as applying
+state "completed: Persist successful commit/history; release lease/checkout; clean owned snapshots after process exit" as completed
+state "waiting_database: Database busy: defer to next interval; do not interrupt its owner" as waiting_database
+state "failed: Stop later steps; if import began and not cancelled, attempt editable config reset; recovery rules decide retry; failed files 7 days, logs 30 days" as failed
