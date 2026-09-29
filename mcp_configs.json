@@ -703,6 +703,33 @@
                         ]
     },
     {
+        "id": "onec-xml",
+        "name": "1C XML Editor",
+        "enabled": false,
+        "startOnLaunch": false,
+        "upstreamMode": "external-http",
+        "upstreamHost": "127.0.0.1",
+        "upstreamStartupTimeoutSeconds": 60,
+        "entry": "{APP_DIR}\\McpControlCenter.exe",
+        "rawCommandArguments": [
+            "--xml-cli-mcp", "--port", "{INTERNAL_PORT}",
+            "--xml-exe", "{APP_DIR}\\mcps\\onec-xml\\server\\1C_XML.exe",
+            "--formats", "{APP_DIR}\\mcps\\onec-xml\\server\\formats.md",
+            "--log-root", "{APP_DIR}\\logs\\control-center\\onec-xml\\commands"
+        ],
+        "workingDirectory": "{APP_DIR}\\mcps\\onec-xml\\server",
+        "internalPort": 11614,
+        "externalPort": 0,
+        "mcpPath": "/mcp",
+        "healthPath": "/healthz",
+        "errorLog": "{APP_DIR}\\mcps\\onec-xml\\mcp.err.log",
+        "installMethod": "git",
+        "gitRepository": "https://github.com/WSSAWER/1c_xml.git",
+        "gitBranch": "release",
+        "commands": [],
+        "configFiles": []
+    },
+    {
         "id":  "task-overseer",
         "name":  "Task Overseer",
         "enabled":  false,

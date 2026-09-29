@@ -29,6 +29,8 @@ smoke проверяет совпадение. Фоновые design-time сбо
 - `McpWorkflowRules` — условия кнопок/пакетных действий и базовая подпись статуса.
 - `OneCDatabaseOperationLifecycle` — переходы операций 1С, исполняемые Stateless.
 - `McpEndpointRules` — включение HTTP-публикации независимо от статуса процесса.
+- `McpCatalogPolicy` — [состав ограниченной поставки](generated/mcp-distribution.md),
+  применяемый при загрузке/обновлении профилей и в Unified.
 - `DesignerBinaryRequest` / `DesignerBinaryRules` — порядок и проверки CF/CFE,
   экспортируемые отдельным сервисом 1C Database.
 
@@ -40,3 +42,6 @@ smoke проверяет совпадение. Фоновые design-time сбо
 Зависимости: [Stateless 5.20.1](https://github.com/dotnet-state-machine/stateless)
 (Apache-2.0), [Mermaid 11.12.2](https://github.com/mermaid-js/mermaid) (MIT).
 Mermaid хранится локально только для документации и не включается в EXE.
+
+Отдельная [поставка с двумя MCP](1c-edition.md) собирается командой
+`.agents/package-1c-edition.ps1` после проверки Release; параметры в инструкции поставки.
