@@ -1,8 +1,0 @@
-flowchart TD
-  validate[Validate saved repository and Designer binding] --> queue[Acquire one database queue and Designer lease]
-  queue -->|success| retrieving_repository["UpdateCfg recursively; no Objects/no revised; force confirms incoming changes; captured objects are not replaced"]
-  retrieving_repository -->|failure or cancellation| error[Stop later steps; log partial outcome; no rollback]
-  retrieving_repository -->|success| updating_database["UpdateDBCfg applies ALL pending changes; Dynamic-; SessionTerminate disable; no commit/unlock"]
-  updating_database -->|failure or cancellation| error[Stop later steps; log partial outcome; no rollback]
-  updating_database -->|success| done[Record success; release lease; clean owned files after process exit]
-  error --> retention[Failed files: 7 days; explicit cancel: clean after exit; logs: 30 days]

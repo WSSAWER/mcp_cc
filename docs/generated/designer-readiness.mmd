@@ -1,9 +1,0 @@
-flowchart TD
-  probe[Read fresh ConfigDumpInfo after loader exit]
-  probe -->|Probe reports an infobase structure error| Block["Infobase structure error during readiness check; no automatic retry or repair."]
-  probe -->|Native output reports unfinished configuration saving| Wait["Configuration saving has not finished; UpdateDBCfg is not started."]
-  probe -->|Probe exit 0 and fresh valid ConfigDumpInfo; no saving warning| Ready["Editable configuration is readable; UpdateDBCfg may start."]
-  probe -->|Any other probe failure or missing/invalid index| Block["Configuration readiness could not be confirmed; UpdateDBCfg is blocked."]
-  Wait -->|30 seconds; cancellation and deadline checked| probe
-  Ready --> apply[UpdateDBCfg once]
-  Block --> failure[Preserve error and logs; no apply or repair]
