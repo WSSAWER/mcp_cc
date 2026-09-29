@@ -1,3 +1,7 @@
+Original MCP Control Center code: LICENSE.txt (noncommercial use only;
+commercial use requires a separate written agreement).
+The following notices apply only to the named third-party components.
+
 Stateless 5.20.1
 https://github.com/dotnet-state-machine/stateless
 Unmodified NuGet library. Full license: Apache-2.0.txt, supplied alongside this file.

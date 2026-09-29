@@ -1,5 +1,8 @@
 # MCP Control Center
 
+Noncommercial use only. Commercial use requires a separate written agreement.
+See LICENSE.txt; third-party components retain their own licenses.
+
 Requires Windows x64 and .NET 7 Desktop Runtime. Git is needed to install or
 update Git-based MCPs; private repositories also require your Git credentials.
 
