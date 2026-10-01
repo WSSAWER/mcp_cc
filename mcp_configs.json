@@ -217,7 +217,7 @@
         "internalPort":  9874,
         "externalPort":  0,
         "mcpPath":  "/mcp",
-        "healthPath":  "/healthz",
+        "healthPath":  "/",
         "errorLog":  "{APP_DIR}\\mcps\\vanessa-automation\\mcp.err.log",
         "installMethod":  "git",
         "npmPackage":  "",
