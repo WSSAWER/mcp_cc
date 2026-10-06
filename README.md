@@ -12,6 +12,10 @@ update Git-based MCPs; private repositories also require your Git credentials.
 4. Connect an MCP client using Streamable HTTP at
    `http://127.0.0.1:<Unified port>/mcp`. Services can copy the Unified URL.
 
+For one Active MCP, use the same port at `/mcp/<configured-id>`.
+Ordinary MCPs keep native tool names and sessions; embedded Admin is stateless
+and requires its Bearer on every request.
+
 - **Services -> Install ASP.NET Core Runtime 7 (x64)** downloads and opens the official Microsoft installer, which may request UAC. .NET 7 is out of support.
 
 Port 0 disables an endpoint. A separate external port for each MCP is optional.
