@@ -478,7 +478,26 @@
         "npmPackage": "",
         "gitRepository": "https://github.com/WSSAWER/onec_database.git",
         "builtinTemplate": "",
-        "commands": [],
+        "commands": [
+            {
+                "title": "Open UI",
+                "command": "{APP_DIR}\\mcps\\onec-database\\server\\ui\\DatabaseMcp.UI.exe",
+                "arguments": "watch --mcp-url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\"",
+                "log": false,
+                "background": true,
+                "confirmation": false,
+                "allowedWhileRunning": true
+            },
+            {
+                "title": "Hide UI",
+                "command": "{APP_DIR}\\mcps\\onec-database\\server\\ui\\DatabaseMcp.UI.exe",
+                "arguments": "hide --mcp-url \"http://127.0.0.1:{INTERNAL_PORT}{MCP_PATH}\"",
+                "log": false,
+                "background": false,
+                "confirmation": false,
+                "allowedWhileRunning": true
+            }
+        ],
         "gitBranch": "release",
         "upstreamMode": "external-http",
         "upstreamHost": "127.0.0.1"
