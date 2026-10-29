@@ -426,12 +426,16 @@
         "enabled":  true,
         "startOnLaunch":  true,
         "command":  "",
+        "upstreamMode": "external-http",
+        "upstreamHost": "127.0.0.1",
         "entry":  "{APP_DIR}\\McpControlCenter.exe",
         "rawCommandArguments":  [
-                                    "--admin-mcp",
-                                    "--stdio-line-json",
+                                    "--admin-http",
                                     "--admin-root",
-                                    "{APP_DIR}"
+                                    "{APP_DIR}",
+                                    "--port", "{INTERNAL_PORT}",
+                                    "--mcp-path", "{MCP_PATH}",
+                                    "--health-path", "{HEALTH_PATH}"
                                 ],
         "workingDirectory":  "{APP_DIR}\\mcps\\control-center-admin\\server",
         "internalPort":  11608,
@@ -791,5 +795,26 @@
                                 "path":  "{APP_DIR}\\mcps\\task-overseer\\.generated\\config.json"
                             }
                         ]
+    },
+    {
+        "id": "firefox-devtools",
+        "name": "Firefox DevTools",
+        "enabled": false,
+        "startOnLaunch": false,
+        "requireAdminBearer": true,
+        "forwardBearer": false,
+        "entry": "node_modules/@mozilla/firefox-devtools-mcp/dist/index.js",
+        "rawCommandArguments": ["--tool-preset", "developer", "--connect-existing"],
+        "workingDirectory": "{APP_DIR}\\mcps\\firefox-devtools\\server",
+        "internalPort": 11617,
+        "externalPort": 0,
+        "mcpPath": "/mcp",
+        "healthPath": "/healthz",
+        "errorLog": "{APP_DIR}\\mcps\\firefox-devtools\\mcp.err.log",
+        "installMethod": "npm",
+        "npmPackage": "@mozilla/firefox-devtools-mcp@0.10.7",
+        "gitRepository": "",
+        "installVariables": [],
+        "commands": []
     }
 ]

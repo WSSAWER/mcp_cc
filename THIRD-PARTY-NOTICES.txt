@@ -2,6 +2,12 @@ Original MCP Control Center code: LICENSE.txt (noncommercial use only;
 commercial use requires a separate written agreement).
 The following notices apply only to the named third-party components.
 
+Optional OpenAI tunnel-client 0.0.18
+https://github.com/openai/tunnel-client
+Separately downloaded optional component, not bundled in CC's default Release.
+Apache-2.0 applies to this component only, not original CC code. Preserve its
+extracted LICENSE, NOTICE and platform-licenses.txt in the private installation.
+
 Stateless 5.20.1
 https://github.com/dotnet-state-machine/stateless
 Unmodified NuGet library. Full license: Apache-2.0.txt, supplied alongside this file.
